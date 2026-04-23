@@ -205,8 +205,9 @@
             min-height: 56px;
             display: block;
             position: relative;
-            z-index: 10;
+            z-index: 150;
             pointer-events: auto;
+            cursor: pointer;
         }
         button.visible { opacity: 1; }
         button:hover { background: rgba(255,255,255,0.06); border-color: white; }
@@ -380,21 +381,41 @@
 
             // HESITATION TIMER
             function startHesitationTimer() {
-                clearTimeout(hesitationTimer);
-                console.log('hesitation timer started');
-                var el = document.querySelector('.step.active .hesitation-text');
+                if (hesitationTimer) {
+                    clearTimeout(hesitationTimer);
+                    hesitationTimer = null;
+                }
+                console.log('HESITATION TIMER STARTED for step');
+                
+                // Find current step number
+                var stepNum = 2;
+                if (document.getElementById('step3').classList.contains('active')) {
+                    stepNum = 3;
+                }
+                
+                var el = document.getElementById('hesitation-step' + stepNum);
+                if (!el) {
+                    console.log('No hesitation element found for step ' + stepNum);
+                    return;
+                }
+                
                 hesitationTimer = setTimeout(function() {
+                    console.log('HESITATION TRIGGERED for step ' + stepNum);
                     if (el) {
                         el.classList.add('visible');
-                        setTimeout(function() { el.classList.remove('visible'); }, 3000);
+                        setTimeout(function() { 
+                            if (el) el.classList.remove('visible'); 
+                        }, 3000);
                     }
                 }, 8000);
             }
 
             function cancelHesitationTimer() {
-                console.log('hesitation timer cancelled');
-                clearTimeout(hesitationTimer);
-                hesitationTimer = null;
+                if (hesitationTimer) {
+                    clearTimeout(hesitationTimer);
+                    hesitationTimer = null;
+                    console.log('HESITATION TIMER CANCELLED');
+                }
             }
 
             function restart() {
