@@ -51,7 +51,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: url('background.jpg');
+            background-image: url('./background.jpg');
             background-size: cover;
             background-position: center 20%;
             background-repeat: no-repeat;
@@ -469,6 +469,18 @@
                 bg.classList.add('loaded');
                 loadingDot.style.display = 'none';
             };
+
+            bg.onerror = function() {
+                loadingDot.style.display = 'none';
+                bg.classList.add('loaded');
+            };
+
+            setTimeout(function() {
+                loadingDot.style.display = 'none';
+                if (!bg.classList.contains('loaded')) {
+                    bg.classList.add('loaded');
+                }
+            }, 3000);
 
             if (bg.complete) {
                 bg.classList.add('loaded');
