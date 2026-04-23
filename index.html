@@ -35,8 +35,9 @@
         body.visible { opacity: 1; }
         #sound-toggle {
             position: fixed;
-            top: 1.5rem;
-            right: 1.5rem;
+            top: 1.2rem;
+            left: 50%;
+            transform: translateX(-50%);
             z-index: 500;
             cursor: pointer;
             color: var(--accent);
@@ -48,18 +49,34 @@
             border: none;
         }
         #sound-toggle.active { opacity: 0.7; }
-        #countdown-timer {
+        #return-timer {
+            display: none;
             position: fixed;
-            top: 1.5rem;
+            top: 1.2rem;
             left: 50%;
             transform: translateX(-50%);
-            z-index: 500;
             font-family: 'Cormorant Garamond', Georgia, serif;
             font-size: 0.9rem;
             color: #c9a84c;
-            opacity: 0.5;
-            letter-spacing: 0.1em;
+            opacity: 0.6;
+            letter-spacing: 0.15em;
+            z-index: 500;
+            pointer-events: none;
+        }
+        #browser-banner {
             display: none;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            padding: 0.5rem;
+            text-align: center;
+            font-size: 0.6rem;
+            color: white;
+            opacity: 0.4;
+            letter-spacing: 0.1em;
+            background: transparent;
+            z-index: 1000;
+            cursor: pointer;
         }
         #bg {
             position: fixed;
@@ -69,13 +86,20 @@
             height: 100%;
             background-image: url('./background.jpg');
             background-size: cover;
-            background-position: center 20%;
+            background-position: center center;
+            background-attachment: fixed;
             background-repeat: no-repeat;
             z-index: -1;
             opacity: 0;
             transition: opacity 1.5s ease;
         }
         #bg.loaded { opacity: 1; }
+        @media (max-width: 768px) {
+            #bg {
+                background-attachment: scroll;
+                background-position: center top;
+            }
+        }
         body::after {
             content: '';
             position: fixed;
@@ -85,24 +109,6 @@
             height: 100%;
             background: rgba(0,0,0,0.78);
             z-index: 0;
-        }
-        #landscape-lock {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--bg);
-            z-index: 9999;
-            align-items: center;
-            justify-content: center;
-            font-size: clamp(1.2rem, 4vw, 1.8rem);
-            text-align: center;
-            padding: 2rem;
-        }
-        @media (orientation: landscape) and (pointer: coarse) {
-            #landscape-lock { display: flex; }
         }
         #cursor {
             width: 12px;
@@ -144,7 +150,6 @@
             margin-bottom: 1rem;
         }
         .sub-text { font-size: 0.85rem; opacity: 0.65; margin-bottom: 1.5rem; }
-        .sub-text.hidden { opacity: 0; transition: opacity 0.8s ease; }
         .sub-text.visible { opacity: 0.65; }
         .hesitation-text { font-size: 0.75rem; font-style: italic; opacity: 0; margin-top: 1.5rem; transition: opacity 0.8s ease; }
         .hesitation-text.visible { opacity: 0.5; }
@@ -207,10 +212,10 @@
 </head>
 <body>
     <button id="sound-toggle">sound</button>
-    <div id="countdown-timer">0:30</div>
+    <div id="return-timer"></div>
     <div id="bg"></div>
-    <div id="landscape-lock">Rotate your phone.</div>
     <div id="cursor"></div>
+    <div id="browser-banner">For best experience, open in Safari or Chrome</div>
     <div id="step1" class="step active">
         <h1 id="step1-text"></h1>
         <button id="step1-btn" onclick="nextStep(1)">I'm ready.</button>
@@ -257,15 +262,23 @@
             var bg = document.getElementById('bg');
             var cursor = document.getElementById('cursor');
             var soundToggle = document.getElementById('sound-toggle');
-            var countdownTimer = document.getElementById('countdown-timer');
+            var returnTimer = document.getElementById('return-timer');
+            var browserBanner = document.getElementById('browser-banner');
             var exitIntentTriggered = false;
             var hesitationTimer = null;
-            var countdownInterval = null;
             var audioCtx = null;
             var soundEnabled = false;
             var clickInitialized = false;
             var isReturningVisitor = localStorage.getItem('imani_visited') ? true : false;
-            var timerStarted = false;
+
+            // Check for in-app browser
+            var isInAppBrowser = /Instagram|FBAN|FBAV/.test(navigator.userAgent);
+            if (isInAppBrowser) {
+                browserBanner.style.display = 'block';
+                browserBanner.addEventListener('click', function() {
+                    browserBanner.style.display = 'none';
+                });
+            }
 
             function va(eventName, value) {
                 if (window.va) {
@@ -337,38 +350,47 @@
                 exitIntentTriggered = true;
             }
 
-            function startCountdown() {
-                if (timerStarted) return;
-                timerStarted = true;
-                countdownTimer.style.display = 'block';
-                var timeLeft = 30;
-                countdownInterval = setInterval(function() {
-                    countdownTimer.textContent = '0:' + (timeLeft < 10 ? '0' : '') + timeLeft;
-                    timeLeft--;
-                    if (timeLeft < 0) {
-                        clearInterval(countdownInterval);
+            // RETURNING VISITOR COUNTDOWN
+            function startReturnCountdown() {
+                var seconds = 30;
+                returnTimer.style.display = 'block';
+                returnTimer.textContent = '0:30';
+                var interval = setInterval(function() {
+                    seconds--;
+                    var secs = seconds % 60;
+                    returnTimer.textContent = '0:' + (secs < 10 ? '0' : '') + secs;
+                    if (seconds <= 0) {
+                        clearInterval(interval);
                         window.location.href = '/closed.html';
                     }
                 }, 1000);
+                window.returnCountdownInterval = interval;
             }
 
-            function stopCountdown() {
-                if (countdownInterval) {
-                    clearInterval(countdownInterval);
+            function stopReturnCountdown() {
+                if (window.returnCountdownInterval) {
+                    clearInterval(window.returnCountdownInterval);
                 }
-                countdownTimer.style.display = 'none';
+                returnTimer.style.display = 'none';
             }
 
-            function startHesitation(stepNum) {
+            // HESITATION TIMER
+            function startHesitationTimer() {
                 clearTimeout(hesitationTimer);
-                console.log('hesitation timer started for step ' + stepNum);
-                var el = document.getElementById('hesitation-step' + stepNum);
+                console.log('hesitation timer started');
+                var el = document.querySelector('.step.active .hesitation-text');
                 hesitationTimer = setTimeout(function() {
                     if (el) {
                         el.classList.add('visible');
                         setTimeout(function() { el.classList.remove('visible'); }, 3000);
                     }
                 }, 8000);
+            }
+
+            function cancelHesitationTimer() {
+                console.log('hesitation timer cancelled');
+                clearTimeout(hesitationTimer);
+                hesitationTimer = null;
             }
 
             function restart() {
@@ -402,7 +424,7 @@
                 document.querySelector('#fanvue-link').onclick = function() { va('fanvue_clicked'); };
             } else {
                 if (isReturningVisitor) {
-                    startCountdown();
+                    startReturnCountdown();
                 }
 
                 if (window.matchMedia('(pointer: fine)').matches) {
@@ -429,20 +451,19 @@
                 function startStep2() {
                     va('step2_reached');
                     localStorage.setItem('step2_time', Date.now());
-                    clearTimeout(hesitationTimer);
                     typeText(document.getElementById('step2-text'), "Why are you here?", 50);
                     setTimeout(function() {
                         document.querySelectorAll('.step2-btn').forEach(function(btn, i) {
                             showButton(btn, i * 400);
                         });
                     }, 800);
-                    startHesitation(2);
+                    setTimeout(startHesitationTimer, 800);
                 }
 
                 function step2Wrong() {
                     va('step2_failed');
                     haptic('wrong');
-                    clearTimeout(hesitationTimer);
+                    cancelHesitationTimer();
                     typeText(document.getElementById('step2-end-text'), "Then you're not ready.", 50);
                     fadeIn(document.getElementById('step2-end-extra'), 1500);
                 }
@@ -450,18 +471,17 @@
                 function startStep3() {
                     va('step3_reached');
                     localStorage.setItem('step3_time', Date.now());
-                    clearTimeout(hesitationTimer);
                     typeText(document.getElementById('step3-text'), "What are you willing to offer?", 50);
                     document.querySelectorAll('.step3-btn').forEach(function(btn, i) {
                         showButton(btn, i * 400);
                     });
-                    startHesitation(3);
+                    setTimeout(startHesitationTimer, 800);
                 }
 
                 function step3Wrong() {
                     va('step3_failed');
                     haptic('wrong');
-                    clearTimeout(hesitationTimer);
+                    cancelHesitationTimer();
                     typeText(document.getElementById('step3-end-text'), "Not enough.", 50);
                     fadeIn(document.getElementById('step3-end-extra'), 1500);
                 }
@@ -473,7 +493,7 @@
                     va('step3_duration_sec', Math.round(s3/1000));
                     va('access_granted');
                     haptic('correct');
-                    stopCountdown();
+                    stopReturnCountdown();
                     sessionStorage.setItem('imani_access', 'granted');
                     typeText(document.getElementById('final-access'), "You have access.", 50);
                     fadeIn(document.getElementById('final-sub'), 1000);
@@ -484,10 +504,10 @@
                 }
 
                 window.nextStep = function(step) {
-                    clearTimeout(hesitationTimer);
+                    cancelHesitationTimer();
                     if (step === 1) {
                         va('step1_entered');
-                        if (isReturningVisitor) startCountdown();
+                        if (isReturningVisitor) startReturnCountdown();
                         var el = document.getElementById('step1');
                         el.classList.add('slide-up');
                         setTimeout(function() {
@@ -500,7 +520,7 @@
                 };
 
                 window.selectOption = function(opt, step) {
-                    clearTimeout(hesitationTimer);
+                    cancelHesitationTimer();
                     if (step === 2) {
                         if (opt === 1) {
                             document.querySelector('.step2-btn').classList.add('correct-flash');
@@ -544,7 +564,7 @@
                     }
                 };
 
-                // Start experience after 1500ms regardless of image loading
+                // Start experience after 1500ms
                 setTimeout(function() {
                     typeText(document.getElementById('step1-text'), "Access is not a right.", 50, function() {
                         setTimeout(function() {
