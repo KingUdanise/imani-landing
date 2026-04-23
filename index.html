@@ -13,18 +13,10 @@
     <meta name="twitter:description" content="It's a response.">
     <meta name="twitter:image" content="https://imani-landing.vercel.app/background.jpg">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%230a0a0a'/><text y='.9em' font-size='90' fill='%23c9a84c'>I</text></svg>">
-    <script defer src="/_vercel/insights/script.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        :root {
-            --bg: #0a0a0a;
-            --text: white;
-            --accent: #c9a84c;
-        }
-
+        :root { --bg: #0a0a0a; --text: white; --accent: #c9a84c; }
         html, body { height: 100%; }
-
         body {
             background-color: var(--bg);
             color: var(--text);
@@ -37,8 +29,10 @@
             padding: 2rem;
             overflow-x: hidden;
             position: relative;
+            opacity: 0;
+            transition: opacity 0.5s ease;
         }
-
+        body.visible { opacity: 1; }
         #sound-toggle {
             position: fixed;
             top: 1.2rem;
@@ -53,7 +47,6 @@
             background: none;
             border: none;
         }
-
         #bg {
             position: fixed;
             top: 0;
@@ -68,9 +61,7 @@
             opacity: 0;
             transition: opacity 1.5s ease;
         }
-
         #bg.loaded { opacity: 1; }
-
         body::after {
             content: '';
             position: fixed;
@@ -81,25 +72,6 @@
             background: rgba(0,0,0,0.78);
             z-index: 0;
         }
-
-        #loading-dot {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: var(--accent);
-            z-index: 3;
-            animation: pulse 800ms ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 0.3; }
-            50% { opacity: 1; }
-        }
-
         #landscape-lock {
             display: none;
             position: fixed;
@@ -115,11 +87,9 @@
             text-align: center;
             padding: 2rem;
         }
-
         @media (orientation: landscape) and (pointer: coarse) {
             #landscape-lock { display: flex; }
         }
-
         #cursor {
             width: 12px;
             height: 12px;
@@ -133,16 +103,8 @@
             box-shadow: 0 0 8px rgba(201,168,76,0.35);
             display: none;
         }
-
-        #cursor.expanded {
-            width: 22px;
-            height: 22px;
-        }
-
-        @media (pointer: fine) {
-            #cursor { display: block; }
-        }
-
+        #cursor.expanded { width: 22px; height: 22px; }
+        @media (pointer: fine) { #cursor { display: block; } }
         .step {
             position: absolute;
             width: 100%;
@@ -157,20 +119,9 @@
             transition: opacity 0.8s ease, transform 0.8s ease;
             pointer-events: none;
             z-index: 100;
-            position: relative;
         }
-
-        .step.active {
-            opacity: 1;
-            transform: translateY(0);
-            pointer-events: auto;
-        }
-
-        .step.slide-up {
-            transform: translateY(-30px);
-            opacity: 0;
-        }
-
+        .step.active { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        .step.slide-up { transform: translateY(-30px); opacity: 0; }
         h1, .question, .response-text {
             font-size: clamp(1.5rem, 5vw, 2.5rem);
             text-align: center;
@@ -178,93 +129,14 @@
             line-height: 1.6;
             margin-bottom: 1rem;
         }
-
         .sub-text { font-size: 0.85rem; opacity: 0.65; margin-bottom: 1.5rem; }
         .sub-text.hidden { opacity: 0; transition: opacity 0.8s ease; }
         .sub-text.visible { opacity: 0.65; }
-
-        .hesitation-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--bg);
-            z-index: 8000;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            gap: 1.2rem;
-        }
-
-        .hesitation-overlay.show { display: flex; }
-
-        .hesitation-overlay p {
-            font-size: clamp(1.2rem, 4vw, 1.6rem);
-            opacity: 0;
-            transition: opacity 0.6s ease;
-        }
-
-        .hesitation-overlay p.visible { opacity: 1; }
-
-        .hesitation-countdown {
-            font-size: 4rem;
-            color: var(--accent);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .hesitation-countdown.visible { opacity: 1; }
-
-        .access-closed-text {
-            font-size: 0.9rem;
-            opacity: 0;
-            letter-spacing: 0.25em;
-            transition: opacity 0.6s ease;
-        }
-
-        .access-closed-text.visible { opacity: 0.4; }
-
-        .timer-display {
-            font-size: 3.5rem;
-            color: var(--text);
-            margin: 1rem 0;
-        }
-
-        .timer-label {
-            font-size: 0.8rem;
-            opacity: 0.6;
-            letter-spacing: 0.1em;
-        }
-
-        .hesitation-text {
-            font-size: 0.75rem;
-            font-style: italic;
-            opacity: 0;
-            margin-top: 1.5rem;
-            transition: opacity 0.8s ease;
-        }
-
+        .hesitation-text { font-size: 0.75rem; font-style: italic; opacity: 0; margin-top: 1.5rem; transition: opacity 0.8s ease; }
         .hesitation-text.visible { opacity: 0.5; }
-
-        .extra-text {
-            font-size: 0.8rem;
-            opacity: 0;
-            margin-top: 1rem;
-            transition: opacity 0.8s ease;
-        }
-
+        .extra-text { font-size: 0.8rem; opacity: 0; margin-top: 1rem; transition: opacity 0.8s ease; }
         .extra-text.visible { opacity: 0.6; }
-
-        .links {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 1.4rem;
-            margin-top: 1rem;
-        }
-
+        .links { display: flex; flex-direction: column; align-items: center; gap: 1.4rem; margin-top: 1rem; }
         .links a {
             color: var(--text);
             text-decoration: none;
@@ -278,10 +150,8 @@
             transition: all 0.3s ease;
             white-space: nowrap;
         }
-
         .links a.visible { opacity: 1; }
         .links a:hover { text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: 1px; }
-
         .try-again-link {
             cursor: pointer;
             color: white;
@@ -298,9 +168,7 @@
             border: none;
             text-decoration: none;
         }
-
         .try-again-link:hover { opacity: 0.8; }
-
         button {
             background: transparent;
             border: 1px solid rgba(255,255,255,0.5);
@@ -317,57 +185,21 @@
             min-height: 56px;
             display: block;
         }
-
         button.visible { opacity: 1; }
         button:hover { background: rgba(255,255,255,0.06); border-color: white; }
-        button.correct-flash {
-            box-shadow: 0 0 20px rgba(201,168,76,0.6);
-            border-color: #c9a84c;
-        }
-
-        .options {
-            display: flex;
-            flex-direction: column;
-            gap: 0.8rem;
-            align-items: center;
-            margin-top: 0.5rem;
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            * { transition-duration: 0.1ms !important; animation-duration: 0.1ms !important; }
-        }
+        button.correct-flash { box-shadow: 0 0 20px rgba(201,168,76,0.6); border-color: #c9a84c; }
+        .options { display: flex; flex-direction: column; gap: 0.8rem; align-items: center; margin-top: 0.5rem; }
     </style>
 </head>
 <body>
     <button id="sound-toggle">♪ off</button>
     <div id="bg"></div>
-    <div id="loading-dot"></div>
     <div id="landscape-lock">Rotate your phone.</div>
     <div id="cursor"></div>
-    <div id="hesitation-overlay">
-        <p id="hes-p1"></p>
-        <p id="hes-p2"></p>
-        <p id="hes-p3"></p>
-        <p id="hes-p4"></p>
-        <span id="hes-count" class="hesitation-countdown"></span>
-        <span id="access-closed" class="access-closed-text">Access closed.</span>
-    </div>
-
-    <div id="returning-screen" class="step">
-        <h1 id="ret-1"></h1>
-        <p id="ret-2" class="sub-text hidden"></p>
-        <p id="ret-3" class="sub-text hidden"></p>
-        <div id="timer-container" style="display:none">
-            <div class="timer-display" id="timer">0:30</div>
-            <div class="timer-label">Answer before time runs out.</div>
-        </div>
-    </div>
-
     <div id="step1" class="step active">
         <h1 id="step1-text"></h1>
         <button id="step1-btn" onclick="nextStep(1)">I'm ready.</button>
     </div>
-
     <div id="step2" class="step">
         <p class="question" id="step2-text"></p>
         <div class="options">
@@ -377,13 +209,11 @@
         </div>
         <p class="hesitation-text" id="hesitation-step2">Most people who hesitate here don't come back.</p>
     </div>
-
     <div id="step2-end" class="step">
         <p class="response-text" id="step2-end-text"></p>
         <p class="extra-text" id="step2-end-extra">Access closes in 24 hours.</p>
         <button class="try-again-link" onclick="restart()">Try again.</button>
     </div>
-
     <div id="step3" class="step">
         <p class="question" id="step3-text"></p>
         <div class="options">
@@ -393,13 +223,11 @@
         </div>
         <p class="hesitation-text" id="hesitation-step3">Most people who hesitate here don't come back.</p>
     </div>
-
     <div id="step3-end" class="step">
         <p class="response-text" id="step3-end-text"></p>
         <p class="extra-text" id="step3-end-extra">Those who understand value don't hesitate.</p>
         <button class="try-again-link" onclick="restart()">Try again.</button>
     </div>
-
     <div id="step-final" class="step">
         <p class="response-text" id="final-access"></p>
         <p class="sub-text visible" id="final-sub">You're one of few.</p>
@@ -409,19 +237,16 @@
             <a href="https://www.fanvue.com/this.imani" target="_blank" class="final-link" id="fanvue-link">Claim your access →</a>
         </div>
     </div>
-
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const bg = document.getElementById('bg');
-            const loadingDot = document.getElementById('loading-dot');
-            const cursor = document.getElementById('cursor');
-            const soundToggle = document.getElementById('sound-toggle');
-            let exitIntentTriggered = false;
-            let hesitationTimer = null;
-            let hesitationSequenceTimer = null;
-            let userInteracted = false;
-            let audioCtx = null;
-            let soundEnabled = false;
+        window.addEventListener('DOMContentLoaded', function() {
+            var bg = document.getElementById('bg');
+            var cursor = document.getElementById('cursor');
+            var soundToggle = document.getElementById('sound-toggle');
+            var exitIntentTriggered = false;
+            var hesitationTimer = null;
+            var audioCtx = null;
+            var soundEnabled = false;
+            var clickInitialized = false;
 
             function va(eventName, value) {
                 if (window.va) {
@@ -441,8 +266,8 @@
 
             function playTick() {
                 if (!soundEnabled || !audioCtx) return;
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
+                var osc = audioCtx.createOscillator();
+                var gain = audioCtx.createGain();
                 osc.connect(gain);
                 gain.connect(audioCtx.destination);
                 osc.frequency.value = 600;
@@ -467,7 +292,7 @@
 
             function typeText(element, text, speed, callback) {
                 element.textContent = '';
-                let i = 0;
+                var i = 0;
                 function type() {
                     if (i < text.length) {
                         element.textContent += text.charAt(i);
@@ -479,28 +304,12 @@
                 type();
             }
 
-            function typeTextMulti(p1, p2, p3, p4, callback) {
-                let delay = 0;
-                if (p1) { typeText(document.getElementById(p1.id), p1.text, p1.speed || 50); delay += p1.text.length * (p1.speed || 50) + p1.pause || 0; }
-                if (p2) { setTimeout(() => typeText(document.getElementById(p2.id), p2.text, p2.speed || 50), delay); delay += p2.text.length * (p2.speed || 50) + p2.pause || 0; }
-                if (p3) { setTimeout(() => typeText(document.getElementById(p3.id), p3.text, p3.speed || 50), delay); delay += p3.text.length * (p3.speed || 50) + p3.pause || 0; }
-                if (p4) { setTimeout(() => typeText(document.getElementById(p4.id), p4.text, p4.speed || 50), delay); delay += p4.text.length * (p4.speed || 50) + p4.pause || 0; }
-                if (callback) setTimeout(callback, delay);
-            }
-
             function showButton(btn, delay) {
-                setTimeout(() => btn.classList.add('visible'), delay);
-            }
-
-            function showElement(el, delay, addClass) {
-                setTimeout(() => {
-                    if (addClass) el.classList.add(addClass);
-                    el.style.opacity = '1';
-                }, delay);
+                setTimeout(function() { btn.classList.add('visible'); }, delay);
             }
 
             function fadeIn(el, delay) {
-                setTimeout(() => el.classList.add('visible'), delay);
+                setTimeout(function() { el.classList.add('visible'); }, delay);
             }
 
             function showExitIntent() {
@@ -508,63 +317,15 @@
                 exitIntentTriggered = true;
             }
 
-            function startHesitation(stepNum, isReturning) {
+            function startHesitation(stepNum) {
                 clearTimeout(hesitationTimer);
-                const el = document.getElementById('hesitation-step' + stepNum);
-                hesitationTimer = setTimeout(() => {
+                var el = document.getElementById('hesitation-step' + stepNum);
+                hesitationTimer = setTimeout(function() {
                     if (el) {
                         el.classList.add('visible');
-                        setTimeout(() => el.classList.remove('visible'), 3000);
-                    }
-                    if (!isReturning) {
-                        runHesitationSequence();
+                        setTimeout(function() { el.classList.remove('visible'); }, 3000);
                     }
                 }, 8000);
-            }
-
-            function runHesitationSequence() {
-                clearTimeout(hesitationTimer);
-                document.querySelectorAll('.step2-btn, .step3-btn').forEach(btn => btn.classList.remove('visible'));
-                
-                const overlay = document.getElementById('hesitation-overlay');
-                const p1 = document.getElementById('hes-p1');
-                const p2 = document.getElementById('hes-p2');
-                const p3 = document.getElementById('hes-p3');
-                const p4 = document.getElementById('hes-p4');
-                const countEl = document.getElementById('hes-count');
-                const closedEl = document.getElementById('access-closed');
-                
-                overlay.classList.add('show');
-                
-                setTimeout(() => { p1.textContent = "You're still thinking."; p1.classList.add('visible'); }, 2000);
-                setTimeout(() => { p2.textContent = "That's already an answer."; p2.classList.add('visible'); }, 4000);
-                setTimeout(() => { p3.textContent = "The ones who belong here don't hesitate."; p3.classList.add('visible'); }, 6000);
-                setTimeout(() => { p4.textContent = "Access is closing."; p4.classList.add('visible'); }, 8000);
-                
-                setTimeout(() => {
-                    let c = 5;
-                    function countDown() {
-                        if (c >= 1) {
-                            countEl.textContent = c;
-                            countEl.classList.add('visible');
-                            setTimeout(() => { countEl.classList.remove('visible'); }, 500);
-                            c--;
-                            setTimeout(countDown, 900);
-                        } else {
-                            countEl.textContent = '';
-                            closedEl.classList.add('visible');
-                            setTimeout(() => {
-                                localStorage.setItem('imani_visited', 'true');
-                                window.location.href = '/closed';
-                            }, 1500);
-                        }
-                    }
-                    countDown();
-                }, 9500);
-            }
-
-            function cancelHesitationSequence() {
-                document.getElementById('hesitation-overlay').classList.remove('show');
             }
 
             function restart() {
@@ -572,28 +333,13 @@
                 location.reload();
             }
 
-            bg.onload = function() {
-                bg.classList.add('loaded');
-                loadingDot.style.display = 'none';
-            };
+            // Start background fade immediately
+            bg.classList.add('loaded');
 
-            bg.onerror = function() {
-                loadingDot.style.display = 'none';
-                bg.classList.add('loaded');
-            };
+            // Make body visible
+            document.body.classList.add('visible');
 
-            setTimeout(function() {
-                loadingDot.style.display = 'none';
-                if (!bg.classList.contains('loaded')) bg.classList.add('loaded');
-            }, 3000);
-
-            if (bg.complete) {
-                bg.classList.add('loaded');
-                loadingDot.style.display = 'none';
-            }
-
-            let clickInitialized = false;
-
+            // Click tracking
             document.addEventListener('click', function init() {
                 if (!clickInitialized) {
                     clickInitialized = true;
@@ -602,87 +348,55 @@
             });
 
             history.pushState(null, null, window.location.href);
-            window.addEventListener('popstate', () => history.pushState(null, null, window.location.href));
+            window.addEventListener('popstate', function() { history.pushState(null, null, window.location.href); });
 
             if (sessionStorage.getItem('imani_access') === 'granted') {
                 document.getElementById('step1').classList.remove('active');
                 document.getElementById('step-final').classList.add('active');
-                showElement(document.getElementById('final-access'), 100, 'visible');
-                setTimeout(() => showElement(document.getElementById('final-sub'), 1000, 'visible'), 1000);
-                document.querySelectorAll('.final-link').forEach((el, i) => {
-                    setTimeout(() => el.classList.add('visible'), 1800 + i * 600);
+                document.getElementById('final-access').classList.add('visible');
+                setTimeout(function() { document.getElementById('final-sub').classList.add('visible'); }, 1000);
+                document.querySelectorAll('.final-link').forEach(function(el, i) {
+                    setTimeout(function() { el.classList.add('visible'); }, 1800 + i * 600);
                 });
                 document.querySelector('#fanvue-link').onclick = function() { va('fanvue_clicked'); };
-            } else if (localStorage.getItem('imani_visited')) {
-                document.getElementById('step1').classList.remove('active');
-                const retScreen = document.getElementById('returning-screen');
-                const timerContainer = document.getElementById('timer-container');
-                retScreen.classList.add('active');
-                
-                typeText(document.getElementById('ret-1'), "You were here before.", 50, () => {
-                    setTimeout(() => {
-                        document.getElementById('ret-2').textContent = "You hesitated.";
-                        document.getElementById('ret-2').classList.add('visible');
-                    }, 1500);
-                    setTimeout(() => {
-                        document.getElementById('ret-3').textContent = "Access is now limited.";
-                        document.getElementById('ret-3').classList.add('visible');
-                    }, 3000);
-                    setTimeout(() => {
-                        timerContainer.style.display = 'block';
-                        let timeLeft = 30;
-                        const timerEl = document.getElementById('timer');
-                        const countdown = setInterval(() => {
-                            timerEl.textContent = '0:' + (timeLeft < 10 ? '0' : '') + timeLeft;
-                            timeLeft--;
-                            if (timeLeft < 0) {
-                                clearInterval(countdown);
-                                localStorage.setItem('imani_visited', 'true');
-                                window.location.href = '/closed';
-                            }
-                        }, 1000);
-                    }, 5000);
-                });
             } else {
                 if (window.matchMedia('(pointer: fine)').matches) {
-                    document.addEventListener('mousemove', (e) => {
+                    document.addEventListener('mousemove', function(e) {
                         cursor.style.left = e.clientX + 'px';
                         cursor.style.top = e.clientY + 'px';
                     });
-                    document.querySelectorAll('button, .links a, .try-again-link').forEach(el => {
-                        el.addEventListener('mouseenter', () => cursor.classList.add('expanded'));
-                        el.addEventListener('mouseleave', () => cursor.classList.remove('expanded'));
+                    document.querySelectorAll('button, .links a, .try-again-link').forEach(function(el) {
+                        el.addEventListener('mouseenter', function() { cursor.classList.add('expanded'); });
+                        el.addEventListener('mouseleave', function() { cursor.classList.remove('expanded'); });
                     });
                 }
 
-                document.addEventListener('mouseleave', (e) => {
+                document.addEventListener('mouseleave', function(e) {
                     if (e.clientY <= 0) showExitIntent();
                 });
 
-                let touchStartY = 0;
-                document.addEventListener('touchstart', (e) => { touchStartY = e.touches[0].clientY; });
-                document.addEventListener('touchmove', (e) => {
+                var touchStartY = 0;
+                document.addEventListener('touchstart', function(e) { touchStartY = e.touches[0].clientY; });
+                document.addEventListener('touchmove', function(e) {
                     if (touchStartY - e.touches[0].clientY > 50) showExitIntent();
                 });
 
                 function startStep2() {
                     va('step2_reached');
                     localStorage.setItem('step2_time', Date.now());
-                    clearTimeout(hesitationSequenceTimer);
                     typeText(document.getElementById('step2-text'), "Why are you here?", 50);
-                    setTimeout(() => {
-                        document.querySelectorAll('.step2-btn').forEach((btn, i) => {
+                    setTimeout(function() {
+                        document.querySelectorAll('.step2-btn').forEach(function(btn, i) {
                             showButton(btn, i * 400);
                         });
                     }, 800);
-                    startHesitation(2, false);
+                    startHesitation(2);
                 }
 
                 function step2Wrong() {
                     va('step2_failed');
                     haptic('wrong');
                     clearTimeout(hesitationTimer);
-                    clearTimeout(hesitationSequenceTimer);
                     typeText(document.getElementById('step2-end-text'), "Then you're not ready.", 50);
                     fadeIn(document.getElementById('step2-end-extra'), 1500);
                 }
@@ -690,26 +404,24 @@
                 function startStep3() {
                     va('step3_reached');
                     localStorage.setItem('step3_time', Date.now());
-                    clearTimeout(hesitationSequenceTimer);
                     typeText(document.getElementById('step3-text'), "What are you willing to offer?", 50);
-                    document.querySelectorAll('.step3-btn').forEach((btn, i) => {
+                    document.querySelectorAll('.step3-btn').forEach(function(btn, i) {
                         showButton(btn, i * 400);
                     });
-                    startHesitation(3, false);
+                    startHesitation(3);
                 }
 
                 function step3Wrong() {
                     va('step3_failed');
                     haptic('wrong');
                     clearTimeout(hesitationTimer);
-                    clearTimeout(hesitationSequenceTimer);
                     typeText(document.getElementById('step3-end-text'), "Not enough.", 50);
                     fadeIn(document.getElementById('step3-end-extra'), 1500);
                 }
 
                 function correctAnswer() {
-                    const s2 = Date.now() - parseInt(localStorage.getItem('step2_time') || Date.now());
-                    const s3 = Date.now() - parseInt(localStorage.getItem('step3_time') || Date.now());
+                    var s2 = Date.now() - parseInt(localStorage.getItem('step2_time') || Date.now());
+                    var s3 = Date.now() - parseInt(localStorage.getItem('step3_time') || Date.now());
                     va('step2_duration_sec', Math.round(s2/1000));
                     va('step3_duration_sec', Math.round(s3/1000));
                     va('access_granted');
@@ -717,20 +429,19 @@
                     sessionStorage.setItem('imani_access', 'granted');
                     typeText(document.getElementById('final-access'), "You have access.", 50);
                     fadeIn(document.getElementById('final-sub'), 1000);
-                    document.querySelectorAll('.final-link').forEach((el, i) => {
-                        setTimeout(() => el.classList.add('visible'), 1800 + i * 600);
+                    document.querySelectorAll('.final-link').forEach(function(el, i) {
+                        setTimeout(function() { el.classList.add('visible'); }, 1800 + i * 600);
                     });
                     document.querySelector('#fanvue-link').onclick = function() { va('fanvue_clicked'); };
                 }
 
                 window.nextStep = function(step) {
-                    cancelHesitationSequence();
                     clearTimeout(hesitationTimer);
                     if (step === 1) {
                         va('step1_entered');
-                        const el = document.getElementById('step1');
+                        var el = document.getElementById('step1');
                         el.classList.add('slide-up');
-                        setTimeout(() => {
+                        setTimeout(function() {
                             el.classList.remove('active', 'slide-up');
                             el.style.display = 'none';
                             document.getElementById('step2').classList.add('active');
@@ -740,15 +451,14 @@
                 };
 
                 window.selectOption = function(opt, step) {
-                    cancelHesitationSequence();
                     clearTimeout(hesitationTimer);
                     if (step === 2) {
                         if (opt === 1) {
                             document.querySelector('.step2-btn').classList.add('correct-flash');
-                            setTimeout(() => {
+                            setTimeout(function() {
                                 va('step2_reached');
                                 document.getElementById('step2').classList.add('slide-up');
-                                setTimeout(() => {
+                                setTimeout(function() {
                                     document.getElementById('step2').style.display = 'none';
                                     document.getElementById('step3').classList.add('active');
                                     startStep3();
@@ -756,7 +466,7 @@
                             }, 400);
                         } else {
                             document.getElementById('step2').classList.add('slide-up');
-                            setTimeout(() => {
+                            setTimeout(function() {
                                 document.getElementById('step2').style.display = 'none';
                                 document.getElementById('step2-end').classList.add('active');
                                 step2Wrong();
@@ -765,9 +475,9 @@
                     } else if (step === 3) {
                         if (opt === 3) {
                             document.querySelector('.step3-btn:last-child').classList.add('correct-flash');
-                            setTimeout(() => {
+                            setTimeout(function() {
                                 document.getElementById('step3').classList.add('slide-up');
-                                setTimeout(() => {
+                                setTimeout(function() {
                                     document.getElementById('step3').style.display = 'none';
                                     document.getElementById('step-final').classList.add('active');
                                     document.getElementById('final-access').textContent = '';
@@ -776,7 +486,7 @@
                             }, 400);
                         } else {
                             document.getElementById('step3').classList.add('slide-up');
-                            setTimeout(() => {
+                            setTimeout(function() {
                                 document.getElementById('step3').style.display = 'none';
                                 document.getElementById('step3-end').classList.add('active');
                                 step3Wrong();
@@ -785,18 +495,19 @@
                     }
                 };
 
-                setTimeout(() => {
-                    typeText(document.getElementById('step1-text'), "Access is not a right.", 50, () => {
-                        setTimeout(() => {
+                // Start experience after 1500ms regardless of image loading
+                setTimeout(function() {
+                    typeText(document.getElementById('step1-text'), "Access is not a right.", 50, function() {
+                        setTimeout(function() {
                             document.getElementById('step1-text').innerHTML += '<br>';
-                            typeText(document.getElementById('step1-text'), "It's a response.", 50, () => {
-                                setTimeout(() => {
+                            typeText(document.getElementById('step1-text'), "It's a response.", 50, function() {
+                                setTimeout(function() {
                                     showButton(document.getElementById('step1-btn'), 1200);
                                 }, 800);
                             });
                         }, 800);
                     });
-                }, 1800);
+                }, 1500);
             }
         });
     </script>
