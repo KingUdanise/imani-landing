@@ -7,20 +7,20 @@
     <meta property="og:title" content="Access is not a right.">
     <meta property="og:description" content="It's a response.">
     <meta property="og:image" content="https://imani-landing.vercel.app/background.jpg">
-    <meta property="og:url" content="https://imani-landing.vercel.app">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Access is not a right.">
-    <meta name="twitter:description" content="It's a response.">
     <meta name="twitter:image" content="https://imani-landing.vercel.app/background.jpg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&display=swap" rel="stylesheet">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%230a0a0a'/><text y='.9em' font-size='90' fill='%23c9a84c'>I</text></svg>">
+    <script defer src="/_vercel/insights/script.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root { --bg: #0a0a0a; --text: white; --accent: #c9a84c; }
         html, body { height: 100%; }
         body {
-            background-color: var(--bg);
-            color: var(--text);
-            font-family: 'Cormorant Garamond', 'Palatino Linotype', Georgia, serif;
+            background-color: #0a0a0a;
+            color: white;
+            font-family: 'Cormorant Garamond', Georgia, serif;
             font-weight: 300;
             display: flex;
             align-items: center;
@@ -29,18 +29,120 @@
             padding: 2rem;
             overflow-x: hidden;
             position: relative;
-            opacity: 0;
-            transition: opacity 0.5s ease;
         }
-        body.visible { opacity: 1; }
+        
+        /* Z-INDEX HIERARCHY */
+        #bg {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-image: url('./background.jpg');
+            background-size: cover;
+            background-position: center center;
+            background-attachment: fixed;
+            z-index: 0;
+            opacity: 0;
+            transition: opacity 1.5s ease;
+        }
+        
+        #bg.loaded {
+            opacity: 1;
+        }
+        
+        #overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.80);
+            z-index: 1;
+            pointer-events: none;
+        }
+        
+        .step {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 2rem;
+            position: absolute;
+            z-index: 10;
+        }
+        
+        .step.active {
+            display: flex;
+        }
+        
+        h1, .question {
+            font-size: clamp(1.5rem, 5vw, 2.5rem);
+            text-align: center;
+            letter-spacing: 0.05em;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+        
+        .sub-text {
+            font-size: 0.85rem;
+            opacity: 0.7;
+            margin-bottom: 1.5rem;
+        }
+        
+        .extra-text {
+            font-size: 0.8rem;
+            opacity: 0.6;
+            margin-top: 1rem;
+        }
+        
+        .links {
+            display: flex;
+            flex-direction: column;
+            gap: 1.4rem;
+            margin-top: 1rem;
+        }
+        
+        .links a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.1rem;
+            letter-spacing: 0.15em;
+        }
+        
+        .links a:hover {
+            text-decoration: underline;
+            text-decoration-color: #c9a84c;
+        }
+        
+        /* BUTTONS */
+        button {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.5);
+            color: white;
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: clamp(0.9rem, 3vw, 1.1rem);
+            padding: 1rem 2rem;
+            letter-spacing: 0.1em;
+            width: min(320px, 85vw);
+            min-height: 56px;
+            display: block;
+            margin: 0.8rem auto;
+            cursor: pointer;
+            pointer-events: auto;
+        }
+        
+        button:hover {
+            background: rgba(255,255,255,0.06);
+            border-color: white;
+        }
+        
+        /* UI ELEMENTS */
         #sound-toggle {
             position: fixed;
             top: 1.2rem;
             left: 50%;
             transform: translateX(-50%);
-            z-index: 500;
+            z-index: 30;
             cursor: pointer;
-            color: var(--accent);
+            color: #c9a84c;
             opacity: 0.3;
             font-size: 0.65rem;
             letter-spacing: 0.2em;
@@ -48,562 +150,378 @@
             background: none;
             border: none;
         }
-        #sound-toggle.active { opacity: 0.7; }
-        #return-timer {
+        
+        #cursor {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #c9a84c;
+            position: fixed;
+            pointer-events: none;
+            z-index: 50;
+            transform: translate(-50%, -50%);
             display: none;
+            box-shadow: 0 0 8px rgba(201,168,76,0.35);
+        }
+        
+        #return-timer {
             position: fixed;
             top: 1.2rem;
             left: 50%;
             transform: translateX(-50%);
+            z-index: 30;
             font-family: 'Cormorant Garamond', Georgia, serif;
             font-size: 0.9rem;
             color: #c9a84c;
             opacity: 0.6;
             letter-spacing: 0.15em;
-            z-index: 500;
             pointer-events: none;
         }
-        #browser-banner {
+        
+        #hes-text {
             display: none;
             position: fixed;
-            bottom: 0;
-            width: 100%;
-            padding: 0.5rem;
-            text-align: center;
-            font-size: 0.6rem;
-            color: white;
-            opacity: 0.4;
-            letter-spacing: 0.1em;
-            background: transparent;
-            z-index: 1000;
-            cursor: pointer;
-        }
-        #bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: url('./background.jpg');
-            background-size: cover;
-            background-position: center center;
-            background-attachment: fixed;
-            background-repeat: no-repeat;
-            z-index: -1;
-            opacity: 0;
-            transition: opacity 1.5s ease;
-        }
-        #bg.loaded { opacity: 1; }
-        @media (max-width: 768px) {
-            #bg {
-                background-attachment: scroll;
-                background-position: center top;
-            }
-        }
-        body::after {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.78);
-            z-index: 0;
-            pointer-events: none;
-        }
-        #cursor {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: var(--accent);
-            position: fixed;
-            pointer-events: none;
-            z-index: 9999;
+            top: 50%;
+            left: 50%;
             transform: translate(-50%, -50%);
-            transition: width 0.2s, height 0.2s, box-shadow 0.2s;
-            box-shadow: 0 0 8px rgba(201,168,76,0.35);
-            display: none;
-        }
-        #cursor.expanded { width: 22px; height: 22px; }
-        @media (pointer: fine) { #cursor { display: block; } }
-        .step {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-            opacity: 0;
-            transform: translateY(30px);
-            transition: opacity 0.8s ease, transform 0.8s ease;
-            pointer-events: none;
-            z-index: 100;
-        }
-        .step.active { opacity: 1; transform: translateY(0); pointer-events: auto; }
-        .step.slide-up { transform: translateY(-30px); opacity: 0; }
-        h1, .question, .response-text {
-            font-size: clamp(1.5rem, 5vw, 2.5rem);
+            z-index: 25;
             text-align: center;
-            letter-spacing: 0.05em;
-            line-height: 1.6;
-            margin-bottom: 1rem;
-        }
-        .sub-text { font-size: 0.85rem; opacity: 0.65; margin-bottom: 1.5rem; }
-        .sub-text.visible { opacity: 0.65; }
-        .hesitation-text { font-size: 0.75rem; font-style: italic; opacity: 0; margin-top: 1.5rem; transition: opacity 0.8s ease; }
-        .hesitation-text.visible { opacity: 0.5; }
-        .extra-text { font-size: 0.8rem; opacity: 0; margin-top: 1rem; transition: opacity 0.8s ease; }
-        .extra-text.visible { opacity: 0.6; }
-        .links { display: flex; flex-direction: column; align-items: center; gap: 1.4rem; margin-top: 1rem; }
-        .links a {
-            color: var(--text);
-            text-decoration: none;
             font-family: 'Cormorant Garamond', Georgia, serif;
-            font-size: 1.1rem;
-            letter-spacing: 0.15em;
-            opacity: 0;
-            display: block;
-            margin: 1.4rem auto;
-            text-align: center;
-            transition: all 0.3s ease;
-            white-space: nowrap;
+            color: white;
+            font-size: 1rem;
+            letter-spacing: 0.1em;
+            pointer-events: none;
         }
-        .links a.visible { opacity: 1; }
-        .links a:hover { text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: 1px; }
-        .try-again-link {
-            cursor: pointer;
+        
+        #hes-count {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 25;
+            text-align: center;
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            color: #c9a84c;
+            font-size: 4rem;
+            pointer-events: none;
+        }
+        
+        .try-link {
             color: white;
             opacity: 0.5;
             font-size: 0.78rem;
-            display: block;
-            text-align: center;
-            margin-top: 1.5rem;
-            pointer-events: auto;
-            z-index: 200;
-            letter-spacing: 0.12em;
+            cursor: pointer;
             font-family: 'Cormorant Garamond', Georgia, serif;
+            letter-spacing: 0.12em;
             background: none;
             border: none;
+            margin-top: 1.5rem;
             text-decoration: none;
         }
-        .try-again-link:hover { opacity: 0.8; }
-        button {
-            background: transparent;
-            border: 1px solid rgba(255,255,255,0.5);
-            color: var(--text);
-            font-family: 'Cormorant Garamond', Georgia, serif;
-            font-size: clamp(0.9rem, 3vw, 1.1rem);
-            font-weight: 300;
-            padding: 1rem 2rem;
-            letter-spacing: 0.1em;
-            transition: all 0.3s ease;
-            margin: 0.8rem auto;
-            opacity: 0;
-            width: min(320px, 85vw);
-            min-height: 56px;
-            display: block;
-            position: relative;
-            z-index: 150;
-            pointer-events: auto;
-            cursor: pointer;
+        
+        .try-link:hover { opacity: 0.8; }
+        
+        @media (max-width: 768px) {
+            #bg { background-attachment: scroll; background-position: center top; }
         }
-        button.visible { opacity: 1; }
-        button:hover { background: rgba(255,255,255,0.06); border-color: white; }
-        button.correct-flash { box-shadow: 0 0 20px rgba(201,168,76,0.6); border-color: #c9a84c; }
-        .options { display: flex; flex-direction: column; gap: 0.8rem; align-items: center; margin-top: 0.5rem; }
     </style>
 </head>
 <body>
+    <div id="bg"></div>
+    <div id="overlay"></div>
     <button id="sound-toggle">sound</button>
     <div id="return-timer"></div>
-    <div id="bg"></div>
     <div id="cursor"></div>
-    <div id="browser-banner">For best experience, open in Safari or Chrome</div>
-    <div id="step1" class="step active">
-        <h1 id="step1-text"></h1>
-        <button id="step1-btn" onclick="nextStep(1)">I'm ready.</button>
+    <div id="hes-text"></div>
+    <div id="hes-count"></div>
+    
+    <!-- STEP 1 -->
+    <div class="step" id="step1" style="display:flex;">
+        <h1 id="step1-h1"></h1>
+        <button onclick="goStep2()" style="display:none">I'm ready.</button>
     </div>
-    <div id="step2" class="step">
-        <p class="question" id="step2-text"></p>
-        <div class="options">
-            <button onclick="selectOption(1, 2)" class="step2-btn">I recognize value when I see it.</button>
-            <button onclick="selectOption(2, 2)" class="step2-btn">I need to understand first.</button>
-            <button onclick="selectOption(3, 2)" class="step2-btn">I'm just curious.</button>
-        </div>
-        <p class="hesitation-text" id="hesitation-step2">Most people who hesitate here don't come back.</p>
+    
+    <!-- STEP 2 -->
+    <div class="step" id="step2">
+        <p class="question" id="step2-q"></p>
+        <button onclick="selectStep2(1)" style="display:none">I recognize value when I see it.</button>
+        <button onclick="selectStep2(2)" style="display:none">I need to understand first.</button>
+        <button onclick="selectStep2(3)" style="display:none">I'm just curious.</button>
     </div>
-    <div id="step2-end" class="step">
-        <p class="response-text" id="step2-end-text"></p>
-        <p class="extra-text" id="step2-end-extra">Access closes in 24 hours.</p>
-        <button class="try-again-link" onclick="restart()">Try again.</button>
+    
+    <!-- STEP 2 FAIL -->
+    <div class="step" id="step2-fail">
+        <p class="question" id="step2fail-q"></p>
+        <p class="extra-text" id="step2fail-extra"></p>
+        <button class="trylink" onclick="tryAgain()">Try again.</button>
     </div>
-    <div id="step3" class="step">
-        <p class="question" id="step3-text"></p>
-        <div class="options">
-            <button onclick="selectOption(1, 3)" class="step3-btn">My attention.</button>
-            <button onclick="selectOption(2, 3)" class="step3-btn">My time.</button>
-            <button onclick="selectOption(3, 3)" class="step3-btn">My resources.</button>
-        </div>
-        <p class="hesitation-text" id="hesitation-step3">Most people who hesitate here don't come back.</p>
+    
+    <!-- STEP 3 -->
+    <div class="step" id="step3">
+        <p class="question" id="step3-q"></p>
+        <button onclick="selectStep3(1)" style="display:none">My attention.</button>
+        <button onclick="selectStep3(2)" style="display:none">My time.</button>
+        <button onclick="selectStep3(3)" style="display:none">My resources.</button>
     </div>
-    <div id="step3-end" class="step">
-        <p class="response-text" id="step3-end-text"></p>
-        <p class="extra-text" id="step3-end-extra">Those who understand value don't hesitate.</p>
-        <button class="try-again-link" onclick="restart()">Try again.</button>
+    
+    <!-- STEP 3 FAIL -->
+    <div class="step" id="step3-fail">
+        <p class="question" id="step3fail-q"></p>
+        <p class="extra-text" id="step3fail-extra"></p>
+        <button class="trylink" onclick="tryAgain()">Try again.</button>
     </div>
-    <div id="step-final" class="step">
-        <p class="response-text" id="final-access"></p>
-        <p class="sub-text visible" id="final-sub">You're one of few.</p>
+    
+    <!-- STEP ACCESS -->
+    <div class="step" id="step-access">
+        <h1 id="access-h1"></h1>
+        <p class="sub-text" id="access-sub" style="display:none">You're one of few.</p>
         <div class="links">
-            <a href="https://instagram.com/this.imani" target="_blank" class="final-link">Instagram</a>
-            <a href="https://x.com/this_imani_" target="_blank" class="final-link">X</a>
-            <a href="https://www.fanvue.com/this.imani" target="_blank" class="final-link" id="fanvue-link">Claim your access →</a>
+            <a href="https://instagram.com/this.imani" target="_blank" style="display:none">Instagram</a>
+            <a href="https://x.com/this_imani_" target="_blank" style="display:none">X</a>
+            <a href="https://www.fanvue.com/this.imani" target="_blank" style="display:none">Claim your access →</a>
         </div>
     </div>
+    
     <script>
-        window.addEventListener('DOMContentLoaded', function() {
-            var bg = document.getElementById('bg');
-            var cursor = document.getElementById('cursor');
-            var soundToggle = document.getElementById('sound-toggle');
-            var returnTimer = document.getElementById('return-timer');
-            var browserBanner = document.getElementById('browser-banner');
-            var exitIntentTriggered = false;
-            var hesitationTimer = null;
-            var audioCtx = null;
-            var soundEnabled = false;
-            var clickInitialized = false;
-            var isReturningVisitor = localStorage.getItem('imani_visited') ? true : false;
-
-            // Check for in-app browser
-            var isInAppBrowser = /Instagram|FBAN|FBAV/.test(navigator.userAgent);
-            if (isInAppBrowser) {
-                browserBanner.style.display = 'block';
-                browserBanner.addEventListener('click', function() {
-                    browserBanner.style.display = 'none';
-                });
+        // SOUND
+        var soundOn = false;
+        var audioCtx = null;
+        
+        document.getElementById('sound-toggle').onclick = function() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             }
-
-            function va(eventName, value) {
-                if (window.va) {
-                    if (value !== undefined) {
-                        window.va('event', { name: eventName, value: value });
-                    } else {
-                        window.va('event', { name: eventName });
-                    }
-                }
-            }
-
-            function initAudio() {
-                if (!audioCtx) {
-                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                }
-            }
-
-            function playTick() {
-                if (!soundEnabled || !audioCtx) return;
-                var osc = audioCtx.createOscillator();
-                var gain = audioCtx.createGain();
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.frequency.value = 600;
-                gain.gain.setValueAtTime(0.025, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
-                osc.start(audioCtx.currentTime);
-                osc.stop(audioCtx.currentTime + 0.04);
-            }
-
-            soundToggle.addEventListener('click', function() {
-                initAudio();
-                soundEnabled = !soundEnabled;
-                soundToggle.textContent = soundEnabled ? 'sound ●' : 'sound';
-                soundToggle.classList.toggle('active', soundEnabled);
+            soundOn = !soundOn;
+            document.getElementById('sound-toggle').textContent = soundOn ? 'sound ●' : 'sound';
+        };
+        
+        function playTick() {
+            if (!soundOn || !audioCtx) return;
+            var osc = audioCtx.createOscillator();
+            var gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.frequency.value = 600;
+            gain.gain.setValueAtTime(0.025, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.04);
+        }
+        
+        // CURSOR
+        if (window.matchMedia('(pointer: fine)').matches) {
+            var cur = document.getElementById('cursor');
+            cur.style.display = 'block';
+            document.addEventListener('mousemove', function(e) {
+                cur.style.left = e.clientX + 'px';
+                cur.style.top = e.clientY + 'px';
             });
-
-            function haptic(type) {
-                if (navigator.vibrate) {
-                    if (type === 'wrong') navigator.vibrate(300);
-                    else navigator.vibrate([80, 40, 80]);
+        }
+        
+        // INSTAGRAM BANNER
+        if (/Instagram|FBAN|FBAV/.test(navigator.userAgent)) {
+            var banner = document.createElement('div');
+            banner.textContent = 'For best experience, open in Safari or Chrome';
+            banner.style.cssText = 'position:fixed;bottom:0;left:0;width:100%;text-align:center;font-size:0.6rem;color:white;opacity:0.35;padding:0.6rem;z-index:1000;cursor:pointer;font-family:Cormorant Garamond,Georgia,serif;letter-spacing:0.1em;';
+            banner.onclick = function() { banner.style.display = 'none'; };
+            document.body.appendChild(banner);
+        }
+        
+        // HESITATION TIMER
+        var hesTimer = null;
+        
+        function startHesTimer() {
+            clearHesTimer();
+            hesTimer = setTimeout(runHesSequence, 8000);
+        }
+        
+        function clearHesTimer() {
+            if (hesTimer) { clearTimeout(hesTimer); hesTimer = null; }
+        }
+        
+        function runHesSequence() {
+            var activeStep = document.querySelector('.step[style*="flex"], .step.active');
+            if (!activeStep) return;
+            var buttons = activeStep.querySelectorAll('button:not(.trylink)');
+            buttons.forEach(function(b) { b.style.display = 'none'; });
+            
+            var texts = ["You're still thinking.", "That's already an answer.", "The ones who belong here don't hesitate.", "Access is closing."];
+            var hesDiv = document.getElementById('hes-text');
+            hesDiv.style.display = 'block';
+            
+            var i = 0;
+            function showNext() {
+                if (i < texts.length) {
+                    hesDiv.textContent = texts[i];
+                    i++;
+                    setTimeout(showNext, 2000);
+                } else {
+                    var count = 5;
+                    var countEl = document.getElementById('hes-count');
+                    countEl.style.display = 'block';
+                    var countInterval = setInterval(function() {
+                        countEl.textContent = count;
+                        count--;
+                        if (count < 0) {
+                            clearInterval(countInterval);
+                            countEl.style.display = 'none';
+                            hesDiv.textContent = 'Access closed.';
+                            setTimeout(function() {
+                                localStorage.setItem('imani_visited', 'true');
+                                window.location.href = '/closed.html';
+                            }, 1500);
+                        }
+                    }, 1000);
                 }
             }
-
-            function typeText(element, text, speed, callback) {
-                element.textContent = '';
-                var i = 0;
-                function type() {
-                    if (i < text.length) {
-                        element.textContent += text.charAt(i);
-                        playTick();
-                        i++;
-                        setTimeout(type, speed);
-                    } else if (callback) setTimeout(callback, speed);
+            showNext();
+        }
+        
+        // RETURNING VISITOR TIMER
+        var returnTimer = null;
+        
+        function startReturnTimer() {
+            var seconds = 30;
+            var timerEl = document.getElementById('return-timer');
+            timerEl.textContent = '0:30';
+            timerEl.style.display = 'block';
+            returnTimer = setInterval(function() {
+                seconds--;
+                var secs = seconds % 60;
+                timerEl.textContent = '0:' + (secs < 10 ? '0' : '') + secs;
+                if (seconds <= 0) {
+                    clearInterval(returnTimer);
+                    window.location.href = '/closed.html';
                 }
-                type();
-            }
-
-            function showButton(btn, delay) {
-                setTimeout(function() { btn.classList.add('visible'); }, delay);
-            }
-
-            function fadeIn(el, delay) {
-                setTimeout(function() { el.classList.add('visible'); }, delay);
-            }
-
-            function showExitIntent() {
-                if (exitIntentTriggered) return;
-                exitIntentTriggered = true;
-            }
-
-            // RETURNING VISITOR COUNTDOWN
-            function startReturnCountdown() {
-                var seconds = 30;
-                returnTimer.style.display = 'block';
-                returnTimer.textContent = '0:30';
-                var interval = setInterval(function() {
-                    seconds--;
-                    var secs = seconds % 60;
-                    returnTimer.textContent = '0:' + (secs < 10 ? '0' : '') + secs;
-                    if (seconds <= 0) {
-                        clearInterval(interval);
-                        window.location.href = '/closed.html';
-                    }
-                }, 1000);
-                window.returnCountdownInterval = interval;
-            }
-
-            function stopReturnCountdown() {
-                if (window.returnCountdownInterval) {
-                    clearInterval(window.returnCountdownInterval);
-                }
-                returnTimer.style.display = 'none';
-            }
-
-            // HESITATION TIMER
-            function startHesitationTimer() {
-                if (hesitationTimer) {
-                    clearTimeout(hesitationTimer);
-                    hesitationTimer = null;
-                }
-                console.log('HESITATION TIMER STARTED for step');
-                
-                // Find current step number
-                var stepNum = 2;
-                if (document.getElementById('step3').classList.contains('active')) {
-                    stepNum = 3;
-                }
-                
-                var el = document.getElementById('hesitation-step' + stepNum);
-                if (!el) {
-                    console.log('No hesitation element found for step ' + stepNum);
-                    return;
-                }
-                
-                hesitationTimer = setTimeout(function() {
-                    console.log('HESITATION TRIGGERED for step ' + stepNum);
-                    if (el) {
-                        el.classList.add('visible');
-                        setTimeout(function() { 
-                            if (el) el.classList.remove('visible'); 
-                        }, 3000);
-                    }
-                }, 8000);
-            }
-
-            function cancelHesitationTimer() {
-                if (hesitationTimer) {
-                    clearTimeout(hesitationTimer);
-                    hesitationTimer = null;
-                    console.log('HESITATION TIMER CANCELLED');
+            }, 1000);
+        }
+        
+        function stopReturnTimer() {
+            if (returnTimer) { clearInterval(returnTimer); returnTimer = null; }
+            document.getElementById('return-timer').style.display = 'none';
+        }
+        
+        // TYPEWRITER
+        function typeText(element, text, speed, callback) {
+            element.textContent = '';
+            var i = 0;
+            function type() {
+                if (i < text.length) {
+                    element.textContent += text.charAt(i);
+                    playTick();
+                    i++;
+                    setTimeout(type, speed);
+                } else if (callback) {
+                    setTimeout(callback, speed);
                 }
             }
-
-            function restart() {
-                sessionStorage.removeItem('imani_access');
-                location.reload();
-            }
-
-            // Start background fade immediately
-            bg.classList.add('loaded');
-            document.body.classList.add('visible');
-
-            // Click tracking
-            document.addEventListener('click', function init() {
-                if (!clickInitialized) {
-                    clickInitialized = true;
-                    localStorage.setItem('step1_time', Date.now());
-                }
+            type();
+        }
+        
+        // SHOW STEP
+        function showStep(stepId) {
+            document.querySelectorAll('.step').forEach(function(s) { s.classList.remove('active'); s.style.display = 'none'; });
+            document.getElementById(stepId).style.display = 'flex';
+            document.getElementById(stepId).classList.add('active');
+        }
+        
+        // TRY AGAIN
+        function tryAgain() {
+            sessionStorage.removeItem('imani_access');
+            window.location.reload();
+        }
+        
+        // STEP NAVIGATION
+        function goStep2() {
+            clearHesTimer();
+            showStep('step2');
+            typeText(document.getElementById('step2-q'), "Why are you here?", 50, function() {
+                var btns = document.querySelectorAll('#step2 button');
+                btns[0].style.display = 'block';
+                setTimeout(function() { btns[1].style.display = 'block'; }, 400);
+                setTimeout(function() { btns[2].style.display = 'block'; }, 800);
+                setTimeout(startHesTimer, 1500);
             });
-
-            history.pushState(null, null, window.location.href);
-            window.addEventListener('popstate', function() { history.pushState(null, null, window.location.href); });
-
-            if (sessionStorage.getItem('imani_access') === 'granted') {
-                document.getElementById('step1').classList.remove('active');
-                document.getElementById('step-final').classList.add('active');
-                document.getElementById('final-access').classList.add('visible');
-                setTimeout(function() { document.getElementById('final-sub').classList.add('visible'); }, 1000);
-                document.querySelectorAll('.final-link').forEach(function(el, i) {
-                    setTimeout(function() { el.classList.add('visible'); }, 1800 + i * 600);
+        }
+        
+        function selectStep2(opt) {
+            clearHesTimer();
+            if (opt === 1) {
+                showStep('step3');
+                typeText(document.getElementById('step3-q'), "What are you willing to offer?", 50, function() {
+                    var btns = document.querySelectorAll('#step3 button');
+                    btns[0].style.display = 'block';
+                    setTimeout(function() { btns[1].style.display = 'block'; }, 400);
+                    setTimeout(function() { btns[2].style.display = 'block'; }, 800);
+                    setTimeout(startHesTimer, 1500);
                 });
-                document.querySelector('#fanvue-link').onclick = function() { va('fanvue_clicked'); };
             } else {
-                if (isReturningVisitor) {
-                    startReturnCountdown();
-                }
-
-                if (window.matchMedia('(pointer: fine)').matches) {
-                    document.addEventListener('mousemove', function(e) {
-                        cursor.style.left = e.clientX + 'px';
-                        cursor.style.top = e.clientY + 'px';
-                    });
-                    document.querySelectorAll('button, .links a, .try-again-link').forEach(function(el) {
-                        el.addEventListener('mouseenter', function() { cursor.classList.add('expanded'); });
-                        el.addEventListener('mouseleave', function() { cursor.classList.remove('expanded'); });
-                    });
-                }
-
-                document.addEventListener('mouseleave', function(e) {
-                    if (e.clientY <= 0) showExitIntent();
-                });
-
-                var touchStartY = 0;
-                document.addEventListener('touchstart', function(e) { touchStartY = e.touches[0].clientY; });
-                document.addEventListener('touchmove', function(e) {
-                    if (touchStartY - e.touches[0].clientY > 50) showExitIntent();
-                });
-
-                function startStep2() {
-                    va('step2_reached');
-                    localStorage.setItem('step2_time', Date.now());
-                    typeText(document.getElementById('step2-text'), "Why are you here?", 50);
+                showStep('step2-fail');
+                typeText(document.getElementById('step2fail-q'), "Then you're not ready.", 50, function() {
                     setTimeout(function() {
-                        document.querySelectorAll('.step2-btn').forEach(function(btn, i) {
-                            showButton(btn, i * 400);
-                        });
-                    }, 800);
-                    setTimeout(startHesitationTimer, 800);
-                }
-
-                function step2Wrong() {
-                    va('step2_failed');
-                    haptic('wrong');
-                    cancelHesitationTimer();
-                    typeText(document.getElementById('step2-end-text'), "Then you're not ready.", 50);
-                    fadeIn(document.getElementById('step2-end-extra'), 1500);
-                }
-
-                function startStep3() {
-                    va('step3_reached');
-                    localStorage.setItem('step3_time', Date.now());
-                    typeText(document.getElementById('step3-text'), "What are you willing to offer?", 50);
-                    document.querySelectorAll('.step3-btn').forEach(function(btn, i) {
-                        showButton(btn, i * 400);
-                    });
-                    setTimeout(startHesitationTimer, 800);
-                }
-
-                function step3Wrong() {
-                    va('step3_failed');
-                    haptic('wrong');
-                    cancelHesitationTimer();
-                    typeText(document.getElementById('step3-end-text'), "Not enough.", 50);
-                    fadeIn(document.getElementById('step3-end-extra'), 1500);
-                }
-
-                function correctAnswer() {
-                    var s2 = Date.now() - parseInt(localStorage.getItem('step2_time') || Date.now());
-                    var s3 = Date.now() - parseInt(localStorage.getItem('step3_time') || Date.now());
-                    va('step2_duration_sec', Math.round(s2/1000));
-                    va('step3_duration_sec', Math.round(s3/1000));
-                    va('access_granted');
-                    haptic('correct');
-                    stopReturnCountdown();
-                    sessionStorage.setItem('imani_access', 'granted');
-                    typeText(document.getElementById('final-access'), "You have access.", 50);
-                    fadeIn(document.getElementById('final-sub'), 1000);
-                    document.querySelectorAll('.final-link').forEach(function(el, i) {
-                        setTimeout(function() { el.classList.add('visible'); }, 1800 + i * 600);
-                    });
-                    document.querySelector('#fanvue-link').onclick = function() { va('fanvue_clicked'); };
-                }
-
-                window.nextStep = function(step) {
-                    cancelHesitationTimer();
-                    if (step === 1) {
-                        va('step1_entered');
-                        if (isReturningVisitor) startReturnCountdown();
-                        var el = document.getElementById('step1');
-                        el.classList.add('slide-up');
-                        setTimeout(function() {
-                            el.classList.remove('active', 'slide-up');
-                            el.style.display = 'none';
-                            document.getElementById('step2').classList.add('active');
-                            startStep2();
-                        }, 800);
-                    }
-                };
-
-                window.selectOption = function(opt, step) {
-                    cancelHesitationTimer();
-                    if (step === 2) {
-                        if (opt === 1) {
-                            document.querySelector('.step2-btn').classList.add('correct-flash');
-                            setTimeout(function() {
-                                va('step2_reached');
-                                document.getElementById('step2').classList.add('slide-up');
-                                setTimeout(function() {
-                                    document.getElementById('step2').style.display = 'none';
-                                    document.getElementById('step3').classList.add('active');
-                                    startStep3();
-                                }, 800);
-                            }, 400);
-                        } else {
-                            document.getElementById('step2').classList.add('slide-up');
-                            setTimeout(function() {
-                                document.getElementById('step2').style.display = 'none';
-                                document.getElementById('step2-end').classList.add('active');
-                                step2Wrong();
-                            }, 800);
-                        }
-                    } else if (step === 3) {
-                        if (opt === 3) {
-                            document.querySelector('.step3-btn:last-child').classList.add('correct-flash');
-                            setTimeout(function() {
-                                document.getElementById('step3').classList.add('slide-up');
-                                setTimeout(function() {
-                                    document.getElementById('step3').style.display = 'none';
-                                    document.getElementById('step-final').classList.add('active');
-                                    document.getElementById('final-access').textContent = '';
-                                    correctAnswer();
-                                }, 800);
-                            }, 400);
-                        } else {
-                            document.getElementById('step3').classList.add('slide-up');
-                            setTimeout(function() {
-                                document.getElementById('step3').style.display = 'none';
-                                document.getElementById('step3-end').classList.add('active');
-                                step3Wrong();
-                            }, 800);
-                        }
-                    }
-                };
-
-                // Start experience after 1500ms
-                setTimeout(function() {
-                    typeText(document.getElementById('step1-text'), "Access is not a right.", 50, function() {
-                        setTimeout(function() {
-                            document.getElementById('step1-text').innerHTML += '<br>';
-                            typeText(document.getElementById('step1-text'), "It's a response.", 50, function() {
-                                setTimeout(function() {
-                                    showButton(document.getElementById('step1-btn'), 1200);
-                                }, 800);
-                            });
-                        }, 800);
-                    });
-                }, 1500);
+                        document.getElementById('step2fail-extra').textContent = 'Access closes in 24 hours.';
+                    }, 1500);
+                });
             }
-        });
+        }
+        
+        function selectStep3(opt) {
+            clearHesTimer();
+            if (opt === 3) {
+                showStep('step-access');
+                sessionStorage.setItem('imani_access', 'granted');
+                stopReturnTimer();
+                document.getElementById('access-sub').style.display = 'block';
+                typeText(document.getElementById('access-h1'), "You have access.", 50, function() {
+                    setTimeout(function() {
+                        var links = document.querySelectorAll('#step-access .links a');
+                        links[0].style.display = 'block';
+                        setTimeout(function() { links[1].style.display = 'block'; }, 600);
+                        setTimeout(function() { links[2].style.display = 'block'; }, 1200);
+                    }, 1000);
+                });
+            } else {
+                showStep('step3-fail');
+                typeText(document.getElementById('step3fail-q'), "Not enough.", 50, function() {
+                    setTimeout(function() {
+                        document.getElementById('step3fail-extra').textContent = 'Those who understand value don\'t hesitate.';
+                    }, 1500);
+                });
+            }
+        }
+        
+        // INIT
+        function init() {
+            document.getElementById('bg').classList.add('loaded');
+            
+            if (sessionStorage.getItem('imani_access') === 'granted') {
+                showStep('step-access');
+                document.getElementById('access-h1').textContent = 'You have access.';
+                var links = document.querySelectorAll('#step-access .links a');
+                links[0].style.display = 'block';
+                links[1].style.display = 'block';
+                links[2].style.display = 'block';
+                return;
+            }
+            
+            if (localStorage.getItem('imani_visited')) {
+                startReturnTimer();
+            }
+            
+            typeText(document.getElementById('step1-h1'), "Access is not a right.", 50, function() {
+                setTimeout(function() {
+                    document.getElementById('step1-h1').innerHTML += '<br>';
+                    typeText(document.getElementById('step1-h1'), "It's a response.", 50, function() {
+                        setTimeout(function() {
+                            document.querySelector('#step1 button').style.display = 'block';
+                        }, 1200);
+                    });
+                }, 800);
+            });
+        }
+        
+        setTimeout(init, 500);
     </script>
 </body>
 </html>
