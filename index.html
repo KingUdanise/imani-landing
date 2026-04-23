@@ -42,10 +42,10 @@
             min-height: 100vh;
             padding: 2rem;
             overflow-x: hidden;
+            position: relative;
         }
 
-        body::before {
-            content: '';
+        #bg {
             position: fixed;
             top: 0;
             left: 0;
@@ -60,7 +60,7 @@
             transition: opacity 1.5s ease;
         }
 
-        body::before.loaded {
+        #bg.loaded {
             opacity: 1;
         }
 
@@ -312,6 +312,7 @@
     </style>
 </head>
 <body>
+    <div id="bg"></div>
     <div id="loading-dot"></div>
     <div id="landscape-lock">Rotate your phone.</div>
     <div id="cursor"></div>
@@ -369,145 +370,144 @@
     </div>
 
     <script>
-        const bg = document.querySelector('body::before');
-        const loadingDot = document.getElementById('loading-dot');
-        const cursor = document.getElementById('cursor');
-        let exitIntentTriggered = false;
-        let hesitationTimer = null;
+        document.addEventListener('DOMContentLoaded', function() {
+            const bg = document.getElementById('bg');
+            const loadingDot = document.getElementById('loading-dot');
+            const cursor = document.getElementById('cursor');
+            let exitIntentTriggered = false;
+            let hesitationTimer = null;
 
-        function va(eventName) {
-            if (window.va) {
-                window.va('event', { name: eventName });
+            function va(eventName) {
+                if (window.va) {
+                    window.va('event', { name: eventName });
+                }
             }
-        }
 
-        function haptic(type) {
-            if (navigator.vibrate) {
-                if (type === 'wrong') navigator.vibrate(300);
-                else navigator.vibrate([80, 40, 80]);
+            function haptic(type) {
+                if (navigator.vibrate) {
+                    if (type === 'wrong') navigator.vibrate(300);
+                    else navigator.vibrate([80, 40, 80]);
+                }
             }
-        }
 
-        function typeText(element, text, speed, callback) {
-            element.textContent = '';
-            let i = 0;
-            function type() {
-                if (i < text.length) {
-                    element.textContent += text.charAt(i);
-                    i++;
-                    setTimeout(type, speed);
-                } else if (callback) setTimeout(callback, speed);
+            function typeText(element, text, speed, callback) {
+                element.textContent = '';
+                let i = 0;
+                function type() {
+                    if (i < text.length) {
+                        element.textContent += text.charAt(i);
+                        i++;
+                        setTimeout(type, speed);
+                    } else if (callback) setTimeout(callback, speed);
+                }
+                type();
             }
-            type();
-        }
 
-        function showButton(btn, delay) {
-            setTimeout(() => btn.classList.add('visible'), delay);
-        }
+            function showButton(btn, delay) {
+                setTimeout(() => btn.classList.add('visible'), delay);
+            }
 
-        function showElement(el, delay) {
-            setTimeout(() => el.classList.add('visible'), delay);
-        }
+            function showElement(el, delay) {
+                setTimeout(() => el.classList.add('visible'), delay);
+            }
 
-        function fadeIn(el, delay) {
-            setTimeout(() => {
-                el.style.opacity = '1';
-                el.classList.add('visible');
-            }, delay);
-        }
-
-        function showExitIntent() {
-            if (exitIntentTriggered) return;
-            exitIntentTriggered = true;
-            const overlay = document.getElementById('exit-overlay');
-            const t1 = document.getElementById('exit-text-1');
-            const t2 = document.getElementById('exit-text-2');
-            const t3 = document.getElementById('exit-text-3');
-            overlay.classList.add('show');
-            
-            setTimeout(() => {
-                t1.textContent = "You're leaving now.";
-                t1.classList.add('visible');
-            }, 100);
-
-            setTimeout(() => {
-                t2.textContent = "That's your choice.";
-                t2.classList.add('visible');
-            }, 900);
-
-            setTimeout(() => {
-                t3.textContent = "The door doesn't stay open.";
-                t3.classList.add('visible');
-            }, 1700);
-
-            setTimeout(() => {
-                overlay.style.opacity = '0';
+            function fadeIn(el, delay) {
                 setTimeout(() => {
-                    overlay.classList.remove('show');
-                    overlay.style.opacity = '';
-                }, 500);
-            }, 4000);
-        }
-
-        function startHesitation(stepNum) {
-            clearTimeout(hesitationTimer);
-            const el = document.getElementById('hesitation-step' + stepNum);
-            hesitationTimer = setTimeout(() => {
-                if (el) el.classList.add('visible');
-                setTimeout(() => el.classList.remove('visible'), 3000);
-            }, 8000);
-        }
-
-        function restart() {
-            sessionStorage.removeItem('imani_access');
-            location.reload();
-        }
-
-        bg.onload = () => {
-            bg.classList.add('loaded');
-            loadingDot.style.display = 'none';
-        };
-
-        if (bg.complete) {
-            bg.classList.add('loaded');
-            loadingDot.style.display = 'none';
-        }
-
-        history.pushState(null, null, window.location.href);
-        window.addEventListener('popstate', () => history.pushState(null, null, window.location.href));
-
-        if (sessionStorage.getItem('imani_access') === 'granted') {
-            document.getElementById('step1').classList.remove('active');
-            document.getElementById('step-final').classList.add('active');
-            showElement(document.getElementById('final-access'), 100);
-            setTimeout(() => showElement(document.getElementById('final-sub'), 1000), 1000);
-            ['.final-link'].forEach((sel, i) => {
-                document.querySelectorAll(sel).forEach((el, j) => {
-                    setTimeout(() => el.classList.add('visible'), 1800 + (i * 600) + (j * 600));
-                });
-            });
-            document.querySelector('#fanvue-link').onclick = () => va('fanvue_clicked');
-        } else {
-            if (window.matchMedia('(pointer: fine)').matches) {
-                document.addEventListener('mousemove', (e) => {
-                    cursor.style.left = e.clientX + 'px';
-                    cursor.style.top = e.clientY + 'px';
-                });
-                document.querySelectorAll('button, .links a, .plain-link').forEach(el => {
-                    el.addEventListener('mouseenter', () => cursor.classList.add('expanded'));
-                    el.addEventListener('mouseleave', () => cursor.classList.remove('expanded'));
-                });
+                    el.style.opacity = '1';
+                    el.classList.add('visible');
+                }, delay);
             }
 
-            document.addEventListener('mouseleave', (e) => {
-                if (e.clientY <= 0) showExitIntent();
-            });
+            function showExitIntent() {
+                if (exitIntentTriggered) return;
+                exitIntentTriggered = true;
+                const overlay = document.getElementById('exit-overlay');
+                const t1 = document.getElementById('exit-text-1');
+                const t2 = document.getElementById('exit-text-2');
+                const t3 = document.getElementById('exit-text-3');
+                overlay.classList.add('show');
+                
+                setTimeout(() => {
+                    t1.textContent = "You're leaving now.";
+                    t1.classList.add('visible');
+                }, 100);
 
-            let touchStartY = 0;
-            document.addEventListener('touchstart', (e) => { touchStartY = e.touches[0].clientY; });
-            document.addEventListener('touchmove', (e) => {
-                const dy = touchStartY - e.touches[0].clientY;
-                if (dy > 50) showExitIntent();
+                setTimeout(() => {
+                    t2.textContent = "That's your choice.";
+                    t2.classList.add('visible');
+                }, 900);
+
+                setTimeout(() => {
+                    t3.textContent = "The door doesn't stay open.";
+                    t3.classList.add('visible');
+                }, 1700);
+
+                setTimeout(() => {
+                    overlay.style.opacity = '0';
+                    setTimeout(() => {
+                        overlay.classList.remove('show');
+                        overlay.style.opacity = '';
+                    }, 500);
+                }, 4000);
+            }
+
+            function startHesitation(stepNum) {
+                clearTimeout(hesitationTimer);
+                const el = document.getElementById('hesitation-step' + stepNum);
+                hesitationTimer = setTimeout(() => {
+                    if (el) el.classList.add('visible');
+                    setTimeout(() => el.classList.remove('visible'), 3000);
+                }, 8000);
+            }
+
+            function restart() {
+                sessionStorage.removeItem('imani_access');
+                location.reload();
+            }
+
+            bg.onload = function() {
+                bg.classList.add('loaded');
+                loadingDot.style.display = 'none';
+            };
+
+            if (bg.complete) {
+                bg.classList.add('loaded');
+                loadingDot.style.display = 'none';
+            }
+
+            history.pushState(null, null, window.location.href);
+            window.addEventListener('popstate', () => history.pushState(null, null, window.location.href));
+
+            if (sessionStorage.getItem('imani_access') === 'granted') {
+                document.getElementById('step1').classList.remove('active');
+                document.getElementById('step-final').classList.add('active');
+                showElement(document.getElementById('final-access'), 100);
+                setTimeout(() => showElement(document.getElementById('final-sub'), 1000), 1000);
+                document.querySelectorAll('.final-link').forEach((el, i) => {
+                    setTimeout(() => el.classList.add('visible'), 1800 + i * 600);
+                });
+                document.querySelector('#fanvue-link').onclick = function() { va('fanvue_clicked'); };
+            } else {
+                if (window.matchMedia('(pointer: fine)').matches) {
+                    document.addEventListener('mousemove', (e) => {
+                        cursor.style.left = e.clientX + 'px';
+                        cursor.style.top = e.clientY + 'px';
+                    });
+                    document.querySelectorAll('button, .links a, .plain-link').forEach(el => {
+                        el.addEventListener('mouseenter', () => cursor.classList.add('expanded'));
+                        el.addEventListener('mouseleave', () => cursor.classList.remove('expanded'));
+                    });
+                }
+
+                document.addEventListener('mouseleave', (e) => {
+                    if (e.clientY <= 0) showExitIntent();
+                });
+
+                let touchStartY = 0;
+                document.addEventListener('touchstart', (e) => { touchStartY = e.touches[0].clientY; });
+                document.addEventListener('touchmove', (e) => {
+                    const dy = touchStartY - e.touches[0].clientY;
+                    if (dy > 50) showExitIntent();
             });
 
             function startStep2() {
@@ -643,7 +643,8 @@
                     }, 800);
                 });
             }, 1800);
-        }
+            }
+        });
     </script>
 </body>
 </html>
