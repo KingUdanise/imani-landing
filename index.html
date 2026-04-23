@@ -4,9 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Imani Sterling</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&display=swap" rel="stylesheet">
+    <meta property="og:title" content="Access is not a right.">
+    <meta property="og:description" content="It's a response.">
+    <meta property="og:image" content="https://imani-landing.vercel.app/background.jpg">
+    <meta property="og:url" content="https://imani-landing.vercel.app">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Access is not a right.">
+    <meta name="twitter:description" content="It's a response.">
+    <meta name="twitter:image" content="https://imani-landing.vercel.app/background.jpg">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%230a0a0a'/><text y='.9em' font-size='90' fill='%23c9a84c'>I</text></svg>">
     <script defer src="/_vercel/insights/script.js"></script>
     <style>
         * {
@@ -18,7 +24,6 @@
         :root {
             --bg: #0a0a0a;
             --text: white;
-            --hover: #888;
             --accent: #c9a84c;
         }
 
@@ -29,7 +34,7 @@
         body {
             background-color: var(--bg);
             color: var(--text);
-            font-family: 'Cormorant Garamond', serif;
+            font-family: 'Cormorant Garamond', 'Palatino Linotype', Georgia, serif;
             font-weight: 300;
             display: flex;
             align-items: center;
@@ -48,9 +53,15 @@
             height: 100%;
             background-image: url('background.jpg');
             background-size: cover;
-            background-position: center top;
+            background-position: center 20%;
             background-repeat: no-repeat;
             z-index: -1;
+            opacity: 0;
+            transition: opacity 1.5s ease;
+        }
+
+        body::before.loaded {
+            opacity: 1;
         }
 
         body::after {
@@ -60,8 +71,48 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.80);
+            background: rgba(0,0,0,0.78);
             z-index: 0;
+        }
+
+        #loading-dot {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--accent);
+            z-index: 3;
+            animation: pulse 800ms ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        #landscape-lock {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(1.2rem, 4vw, 1.8rem);
+            text-align: center;
+            padding: 2rem;
+        }
+
+        @media (orientation: landscape) and (pointer: coarse) {
+            #landscape-lock {
+                display: flex;
+            }
         }
 
         #cursor {
@@ -77,43 +128,44 @@
             display: none;
         }
 
-        @media (pointer: fine) {
-            #cursor {
-                display: block;
-            }
-            * {
-                cursor: none;
-            }
-        }
-
         #cursor.expanded {
             width: 20px;
             height: 20px;
         }
 
-        #countdown {
+        @media (pointer: fine) {
+            #cursor {
+                display: block;
+            }
+        }
+
+        #exit-overlay {
+            display: none;
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            display: flex;
+            background: var(--bg);
+            z-index: 9000;
             align-items: center;
             justify-content: center;
-            background: transparent;
-            z-index: 2;
+            flex-direction: column;
+            gap: 1.5rem;
         }
 
-        #countdown span {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 10rem;
-            color: white;
+        #exit-overlay.show {
+            display: flex;
+        }
+
+        #exit-overlay p {
+            font-size: clamp(1.3rem, 4vw, 1.8rem);
             opacity: 0;
-            transition: opacity 0.45s ease;
+            transition: opacity 0.5s ease;
         }
 
-        #countdown span.visible {
-            opacity: 0.12;
+        #exit-overlay p.visible {
+            opacity: 1;
         }
 
         .step {
@@ -140,61 +192,69 @@
             opacity: 0;
         }
 
-        h1 {
+        h1, .question, .response-text {
             font-size: clamp(1.5rem, 5vw, 2.5rem);
             text-align: center;
             letter-spacing: 0.05em;
             line-height: 1.6;
-            margin-bottom: 3rem;
-            display: inline;
+            margin-bottom: 2.5rem;
         }
 
-        .question {
-            font-size: clamp(1.5rem, 5vw, 2.5rem);
-            text-align: center;
-            letter-spacing: 0.05em;
-            line-height: 1.6;
-            margin-bottom: 3rem;
-            display: inline;
-        }
-
-        .response-text {
-            font-size: clamp(1.5rem, 4vw, 2rem);
-            text-align: center;
-            letter-spacing: 0.05em;
-            display: inline;
-        }
-
-        .access-text {
-            font-size: clamp(1.5rem, 4vw, 2rem);
-            text-align: center;
-            letter-spacing: 0.05em;
-            margin-bottom: 3rem;
+        .sub-text {
+            font-size: 0.85rem;
+            opacity: 0.65;
+            margin-bottom: 1.5rem;
             opacity: 0;
-            transition: opacity 1.5s ease;
+            transition: opacity 0.8s ease;
         }
 
-        .access-text.visible {
-            opacity: 1;
+        .sub-text.visible {
+            opacity: 0.65;
+        }
+
+        .hesitation-text {
+            font-size: 0.75rem;
+            font-style: italic;
+            opacity: 0;
+            margin-top: 1.5rem;
+            transition: opacity 0.8s ease;
+        }
+
+        .hesitation-text.visible {
+            opacity: 0.5;
+        }
+
+        .extra-text {
+            font-size: 0.8rem;
+            opacity: 0.6;
+            margin-top: 1rem;
+            opacity: 0;
+            transition: opacity 0.8s ease;
+        }
+
+        .extra-text.visible {
+            opacity: 0.6;
         }
 
         .links {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 1.2rem;
+            gap: 1.4rem;
         }
 
         .links a {
             color: var(--text);
             text-decoration: none;
-            font-family: 'Cormorant Garamond', serif;
+            font-family: 'Cormorant Garamond', 'Palatino Linotype', Georgia, serif;
             font-size: 1.1rem;
             letter-spacing: 0.15em;
             opacity: 0;
             display: block;
-            margin: 1.2rem auto;
+            margin: 1.4rem auto;
+            text-align: center;
             transition: all 0.3s ease;
+            white-space: nowrap;
         }
 
         .links a.visible {
@@ -204,17 +264,23 @@
         .links a:hover {
             text-decoration: underline;
             text-decoration-color: var(--accent);
+            text-decoration-thickness: 1px;
+        }
+
+        .plain-link {
+            font-size: 0.9rem;
+            opacity: 0.7;
+            cursor: pointer;
         }
 
         button {
             background: transparent;
-            border: 1px solid var(--text);
+            border: 1px solid rgba(255,255,255,0.5);
             color: var(--text);
-            font-family: 'Cormorant Garamond', serif;
-            font-size: clamp(1rem, 3vw, 1.25rem);
+            font-family: 'Cormorant Garamond', 'Palatino Linotype', Georgia, serif;
+            font-size: clamp(0.9rem, 3vw, 1.1rem);
             font-weight: 300;
             padding: 1rem 2rem;
-            cursor: none;
             letter-spacing: 0.1em;
             transition: all 0.3s ease;
             margin: 0.8rem auto;
@@ -229,254 +295,354 @@
         }
 
         button:hover {
-            background: var(--text);
-            color: var(--bg);
+            background: rgba(255,255,255,0.06);
+            border-color: white;
         }
 
         .options {
             display: flex;
             flex-direction: column;
-            gap: 1rem;
+            gap: 0.8rem;
             align-items: center;
         }
 
-        .typed-cursor {
-            border-right: 2px solid var(--text);
-            animation: blink 0.7s infinite;
-        }
-
-        @keyframes blink {
-            0%, 100% { border-color: var(--text); }
-            50% { border-color: transparent; }
+        @media (prefers-reduced-motion: reduce) {
+            * { transition-duration: 0.1ms !important; animation-duration: 0.1ms !important; }
         }
     </style>
 </head>
 <body>
+    <div id="loading-dot"></div>
+    <div id="landscape-lock">Rotate your phone.</div>
     <div id="cursor"></div>
-    <div id="countdown"><span></span></div>
+    <div id="exit-overlay">
+        <p id="exit-text-1"></p>
+        <p id="exit-text-2"></p>
+        <p id="exit-text-3"></p>
+    </div>
 
     <div id="step1" class="step active">
-        <h1><span class="typed-text"></span></h1>
-        <button onclick="nextStep(1)">Continue</button>
+        <h1 id="step1-text"></h1>
+        <button id="step1-btn" onclick="nextStep(1)">I'm ready.</button>
     </div>
 
     <div id="step2" class="step">
-        <p class="question"><span class="typed-text"></span></p>
+        <p class="question" id="step2-text"></p>
         <div class="options">
-            <button onclick="selectOption(1, 1)" class="typed-btn">I recognize value when I see it.</button>
-            <button onclick="selectOption(2, 1)" class="typed-btn">I need to understand first.</button>
-            <button onclick="selectOption(3, 1)" class="typed-btn">I'm just curious.</button>
+            <button onclick="selectOption(1, 2)" class="step2-btn">I recognize value when I see it.</button>
+            <button onclick="selectOption(2, 2)" class="step2-btn">I need to understand first.</button>
+            <button onclick="selectOption(3, 2)" class="step2-btn">I'm just curious.</button>
         </div>
+        <p class="hesitation-text" id="hesitation-step2">Most people who hesitate here don't come back.</p>
     </div>
 
     <div id="step2-end" class="step">
-        <p class="response-text"><span class="typed-text"></span></p>
+        <p class="response-text" id="step2-end-text"></p>
+        <p class="extra-text" id="step2-end-extra">Access closes in 24 hours.</p>
+        <a class="plain-link" onclick="restart()">Try again.</a>
     </div>
 
     <div id="step3" class="step">
-        <p class="question"><span class="typed-text"></span></p>
+        <p class="question" id="step3-text"></p>
         <div class="options">
-            <button onclick="selectOption(1, 3)" class="typed-btn">My attention.</button>
-            <button onclick="selectOption(2, 3)" class="typed-btn">My time.</button>
-            <button onclick="selectOption(3, 3)" class="typed-btn">My resources.</button>
+            <button onclick="selectOption(1, 3)" class="step3-btn">My attention.</button>
+            <button onclick="selectOption(2, 3)" class="step3-btn">My time.</button>
+            <button onclick="selectOption(3, 3)" class="step3-btn">My resources.</button>
         </div>
+        <p class="hesitation-text" id="hesitation-step3">Most people who hesitate here don't come back.</p>
     </div>
 
     <div id="step3-end" class="step">
-        <p class="response-text"><span class="typed-text"></span></p>
+        <p class="response-text" id="step3-end-text"></p>
+        <p class="extra-text" id="step3-end-extra">Those who understand value don't hesitate.</p>
+        <a class="plain-link" onclick="restart()">Try again.</a>
     </div>
 
     <div id="step-final" class="step">
-        <p id="access-text" class="access-text">You have access.</p>
+        <p class="response-text" id="final-access"></p>
+        <p class="sub-text" id="final-sub">You're one of few.</p>
         <div class="links">
-            <a href="https://instagram.com/this.imani" target="_blank">Instagram</a>
-            <a href="https://x.com/this_imani_" target="_blank">X</a>
-            <a href="https://www.fanvue.com/this.imani" target="_blank">FanVue</a>
+            <a href="https://instagram.com/this.imani" target="_blank" class="final-link">Instagram</a>
+            <a href="https://x.com/this_imani_" target="_blank" class="final-link">X</a>
+            <a href="https://www.fanvue.com/this.imani" target="_blank" class="final-link" id="fanvue-link">Enter Imani's world</a>
         </div>
     </div>
 
     <script>
-        const countdownEl = document.getElementById('countdown').querySelector('span');
-        let typedTexts = {};
+        const bg = document.querySelector('body::before');
+        const loadingDot = document.getElementById('loading-dot');
+        const cursor = document.getElementById('cursor');
+        let exitIntentTriggered = false;
+        let hesitationTimer = null;
 
-        if (window.matchMedia('(pointer: fine)').matches) {
-            const cursor = document.getElementById('cursor');
-            
-            document.addEventListener('mousemove', (e) => {
-                cursor.style.left = e.clientX + 'px';
-                cursor.style.top = e.clientY + 'px';
-            });
-
-            document.querySelectorAll('button').forEach(btn => {
-                btn.addEventListener('mouseenter', () => cursor.classList.add('expanded'));
-                btn.addEventListener('mouseleave', () => cursor.classList.remove('expanded'));
-            });
+        function va(eventName) {
+            if (window.va) {
+                window.va('event', { name: eventName });
+            }
         }
 
         function haptic(type) {
             if (navigator.vibrate) {
-                if (type === 'wrong') {
-                    navigator.vibrate(300);
-                } else {
-                    navigator.vibrate([80, 40, 80]);
-                }
+                if (type === 'wrong') navigator.vibrate(300);
+                else navigator.vibrate([80, 40, 80]);
             }
         }
 
-        function typeWriter(element, text, speed, callback) {
+        function typeText(element, text, speed, callback) {
             element.textContent = '';
             let i = 0;
-            const isQuestion = element.classList.contains('question') || element.classList.contains('response-text');
-            const localSpeed = isQuestion ? 35 : speed;
-            
             function type() {
                 if (i < text.length) {
                     element.textContent += text.charAt(i);
                     i++;
-                    setTimeout(type, localSpeed);
-                } else if (callback) {
-                    setTimeout(callback, 600);
-                }
+                    setTimeout(type, speed);
+                } else if (callback) setTimeout(callback, speed);
             }
             type();
         }
 
-        function showButtons(selector) {
-            document.querySelectorAll(selector).forEach(btn => {
-                setTimeout(() => btn.classList.add('visible'), 100);
-            });
+        function showButton(btn, delay) {
+            setTimeout(() => btn.classList.add('visible'), delay);
         }
 
-        function runCountdown(callback) {
-            const countdown = document.getElementById('countdown');
-            countdown.style.display = 'flex';
-            let count = 5;
-            
-            function showNumber() {
-                countdownEl.textContent = count;
-                countdownEl.classList.add('visible');
-                
-                setTimeout(() => {
-                    countdownEl.classList.remove('visible');
-                }, 900);
-                
-                if (count > 0) {
-                    count--;
-                    setTimeout(showNumber, 900);
-                } else {
-                    setTimeout(() => {
-                        countdown.style.display = 'none';
-                        if (callback) callback();
-                    }, 900);
-                }
-            }
-            showNumber();
+        function showElement(el, delay) {
+            setTimeout(() => el.classList.add('visible'), delay);
         }
 
-        const texts = {
-            'step1': 'Access is not a right.\nIt\'s a response.',
-            'step2': 'Why are you here?',
-            'step2-end': 'Then you\'re not ready.',
-            'step3': 'What are you willing to offer?',
-            'step3-end': 'Not enough.'
-        };
-
-        function replaceBrWithBreak(text) {
-            return text.replace(/\n/g, '<br>');
-        }
-
-        document.getElementById('step1').querySelector('h1').innerHTML = '<span class="typed-text"></span>';
-
-        function initTyping() {
-            const step1El = document.querySelector('#step1 h1 .typed-text');
-            typeWriter(step1El, 'Access is not a right.\nIt\'s a response.', 50, () => {
-                showButtons('#step1 button');
-            });
-        }
-
-        runCountdown(initTyping);
-
-        function fadeOut(element, callback) {
-            element.classList.remove('active');
-            element.classList.add('fade-out');
+        function fadeIn(el, delay) {
             setTimeout(() => {
-                element.classList.remove('fade-out');
-                if (callback) callback();
-            }, 1500);
+                el.style.opacity = '1';
+                el.classList.add('visible');
+            }, delay);
         }
 
-        function showStep(stepId) {
-            const nextStepEl = document.getElementById(stepId);
-            nextStepEl.classList.add('active');
+        function showExitIntent() {
+            if (exitIntentTriggered) return;
+            exitIntentTriggered = true;
+            const overlay = document.getElementById('exit-overlay');
+            const t1 = document.getElementById('exit-text-1');
+            const t2 = document.getElementById('exit-text-2');
+            const t3 = document.getElementById('exit-text-3');
+            overlay.classList.add('show');
             
-            if (texts[stepId]) {
-                const textEl = nextStepEl.querySelector('.typed-text') || nextStepEl.querySelector('.question .typed-text') || nextStepEl.querySelector('.response-text .typed-text');
-                const el = nextStepEl.querySelector('.question') || nextStepEl.querySelector('.response-text');
-                if (el) {
-                    el.innerHTML = '<span class="typed-text"></span>';
-                    const typedEl = el.querySelector('.typed-text');
-                    typeWriter(typedEl, texts[stepId], 50, () => {
-                        if (stepId === 'step2') {
-                            showButtons('#step2 .typed-btn');
-                        } else if (stepId === 'step3') {
-                            showButtons('#step3 .typed-btn');
-                        }
-                    });
-                }
-            }
-        }
-
-        function nextStep(current) {
-            const currentEl = document.getElementById('step' + current);
-            fadeOut(currentEl, () => showStep('step' + (current + 1)));
-        }
-
-        function showAccessLinks() {
-            const accessText = document.getElementById('access-text');
-            const links = document.querySelectorAll('.links a');
-
             setTimeout(() => {
-                accessText.classList.add('visible');
+                t1.textContent = "You're leaving now.";
+                t1.classList.add('visible');
             }, 100);
 
             setTimeout(() => {
-                links[0].classList.add('visible');
-            }, 600);
+                t2.textContent = "That's your choice.";
+                t2.classList.add('visible');
+            }, 900);
 
             setTimeout(() => {
-                links[1].classList.add('visible');
-            }, 1200);
+                t3.textContent = "The door doesn't stay open.";
+                t3.classList.add('visible');
+            }, 1700);
 
             setTimeout(() => {
-                links[2].classList.add('visible');
-            }, 1800);
+                overlay.style.opacity = '0';
+                setTimeout(() => {
+                    overlay.classList.remove('show');
+                    overlay.style.opacity = '';
+                }, 500);
+            }, 4000);
         }
 
-        function selectOption(option, step) {
-            if (step === 1) {
-                if (option === 1) {
-                    haptic('correct');
-                    const currentEl = document.getElementById('step2');
-                    fadeOut(currentEl, () => showStep('step3'));
-                } else {
-                    haptic('wrong');
-                    const currentEl = document.getElementById('step2');
-                    fadeOut(currentEl, () => showStep('step2-end'));
-                }
-            } else if (step === 3) {
-                if (option === 3) {
-                    haptic('correct');
-                    const currentEl = document.getElementById('step3');
-                    fadeOut(currentEl, () => {
-                        showStep('step-final');
-                        showAccessLinks();
-                    });
-                } else {
-                    haptic('wrong');
-                    const currentEl = document.getElementById('step3');
-                    fadeOut(currentEl, () => showStep('step3-end'));
-                }
+        function startHesitation(stepNum) {
+            clearTimeout(hesitationTimer);
+            const el = document.getElementById('hesitation-step' + stepNum);
+            hesitationTimer = setTimeout(() => {
+                if (el) el.classList.add('visible');
+                setTimeout(() => el.classList.remove('visible'), 3000);
+            }, 8000);
+        }
+
+        function restart() {
+            sessionStorage.removeItem('imani_access');
+            location.reload();
+        }
+
+        bg.onload = () => {
+            bg.classList.add('loaded');
+            loadingDot.style.display = 'none';
+        };
+
+        if (bg.complete) {
+            bg.classList.add('loaded');
+            loadingDot.style.display = 'none';
+        }
+
+        history.pushState(null, null, window.location.href);
+        window.addEventListener('popstate', () => history.pushState(null, null, window.location.href));
+
+        if (sessionStorage.getItem('imani_access') === 'granted') {
+            document.getElementById('step1').classList.remove('active');
+            document.getElementById('step-final').classList.add('active');
+            showElement(document.getElementById('final-access'), 100);
+            setTimeout(() => showElement(document.getElementById('final-sub'), 1000), 1000);
+            ['.final-link'].forEach((sel, i) => {
+                document.querySelectorAll(sel).forEach((el, j) => {
+                    setTimeout(() => el.classList.add('visible'), 1800 + (i * 600) + (j * 600));
+                });
+            });
+            document.querySelector('#fanvue-link').onclick = () => va('fanvue_clicked');
+        } else {
+            if (window.matchMedia('(pointer: fine)').matches) {
+                document.addEventListener('mousemove', (e) => {
+                    cursor.style.left = e.clientX + 'px';
+                    cursor.style.top = e.clientY + 'px';
+                });
+                document.querySelectorAll('button, .links a, .plain-link').forEach(el => {
+                    el.addEventListener('mouseenter', () => cursor.classList.add('expanded'));
+                    el.addEventListener('mouseleave', () => cursor.classList.remove('expanded'));
+                });
             }
+
+            document.addEventListener('mouseleave', (e) => {
+                if (e.clientY <= 0) showExitIntent();
+            });
+
+            let touchStartY = 0;
+            document.addEventListener('touchstart', (e) => { touchStartY = e.touches[0].clientY; });
+            document.addEventListener('touchmove', (e) => {
+                const dy = touchStartY - e.touches[0].clientY;
+                if (dy > 50) showExitIntent();
+            });
+
+            function startStep2() {
+                va('step2_reached');
+                typeText(document.getElementById('step2-text'), "Why are you here?", 50);
+                setTimeout(() => {
+                    document.querySelectorAll('.step2-btn').forEach((btn, i) => {
+                        showButton(btn, i * 400);
+                    });
+                }, 800);
+                startHesitation(2);
+            }
+
+            function step2Wrong() {
+                va('step2_failed');
+                haptic('wrong');
+                clearTimeout(hesitationTimer);
+                typeText(document.getElementById('step2-end-text'), "Then you're not ready.", 50);
+                fadeIn(document.getElementById('step2-end-extra'), 1500);
+            }
+
+            function startStep3() {
+                va('step3_reached');
+                typeText(document.getElementById('step3-text'), "What are you willing to offer?", 50);
+                document.querySelectorAll('.step3-btn').forEach((btn, i) => {
+                    showButton(btn, i * 400);
+                });
+                startHesitation(3);
+            }
+
+            function step3Wrong() {
+                va('step3_failed');
+                haptic('wrong');
+                clearTimeout(hesitationTimer);
+                typeText(document.getElementById('step3-end-text'), "Not enough.", 50);
+                fadeIn(document.getElementById('step3-end-extra'), 1500);
+            }
+
+            function correctAnswer() {
+                va('access_granted');
+                haptic('correct');
+                sessionStorage.setItem('imani_access', 'granted');
+                typeText(document.getElementById('final-access'), "You have access.", 50);
+                fadeIn(document.getElementById('final-sub'), 1000);
+                ['.final-link'].forEach((sel, i) => {
+                    document.querySelectorAll(sel).forEach((el, j) => {
+                        setTimeout(() => el.classList.add('visible'), 1800 + (i * 600) + (j * 600));
+                    });
+                });
+                document.querySelector('#fanvue-link').onclick = () => va('fanvue_clicked');
+            }
+
+            window.nextStep = function(step) {
+                clearTimeout(hesitationTimer);
+                if (step === 1) {
+                    va('step1_entered');
+                    const el = document.getElementById('step1');
+                    el.classList.remove('active');
+                    setTimeout(() => {
+                        el.classList.add('fade-out');
+                        setTimeout(() => {
+                            document.getElementById('step1').style.display = 'none';
+                            document.getElementById('step2').classList.add('active');
+                            startStep2();
+                        }, 1500);
+                    }, 100);
+                }
+            };
+
+            window.selectOption = function(opt, step) {
+                clearTimeout(hesitationTimer);
+                if (step === 2) {
+                    if (opt === 1) {
+                        va('step2_reached');
+                        const el = document.getElementById('step2');
+                        el.classList.remove('active');
+                        setTimeout(() => {
+                            el.classList.add('fade-out');
+                            setTimeout(() => {
+                                document.getElementById('step2').style.display = 'none';
+                                document.getElementById('step3').classList.add('active');
+                                startStep3();
+                            }, 1500);
+                        }, 100);
+                    } else {
+                        const el = document.getElementById('step2');
+                        el.classList.remove('active');
+                        setTimeout(() => {
+                            el.classList.add('fade-out');
+                            setTimeout(() => {
+                                document.getElementById('step2').style.display = 'none';
+                                document.getElementById('step2-end').classList.add('active');
+                                step2Wrong();
+                            }, 1500);
+                        }, 100);
+                    }
+                } else if (step === 3) {
+                    if (opt === 3) {
+                        const el = document.getElementById('step3');
+                        el.classList.remove('active');
+                        setTimeout(() => {
+                            el.classList.add('fade-out');
+                            setTimeout(() => {
+                                document.getElementById('step3').style.display = 'none';
+                                document.getElementById('step-final').classList.add('active');
+                                document.getElementById('final-access').textContent = '';
+                                correctAnswer();
+                            }, 1500);
+                        }, 100);
+                    } else {
+                        const el = document.getElementById('step3');
+                        el.classList.remove('active');
+                        setTimeout(() => {
+                            el.classList.add('fade-out');
+                            setTimeout(() => {
+                                document.getElementById('step3').style.display = 'none';
+                                document.getElementById('step3-end').classList.add('active');
+                                step3Wrong();
+                            }, 1500);
+                        }, 100);
+                    }
+                }
+            };
+
+            setTimeout(() => {
+                typeText(document.getElementById('step1-text'), "Access is not a right.", 50, () => {
+                    setTimeout(() => {
+                        typeText(document.getElementById('step1-text'), "It's a response.", 50, () => {
+                            setTimeout(() => {
+                                showButton(document.getElementById('step1-btn'), 1200);
+                            }, 800);
+                        });
+                    }, 800);
+                });
+            }, 1800);
         }
     </script>
 </body>
