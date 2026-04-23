@@ -17,6 +17,7 @@
         :root {
             --bg: #0a0a0a;
             --text: white;
+            --hover: #888;
         }
 
         html, body {
@@ -79,6 +80,44 @@
             font-size: clamp(1.5rem, 4vw, 2rem);
             text-align: center;
             letter-spacing: 0.05em;
+        }
+
+        .access-text {
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            text-align: center;
+            letter-spacing: 0.05em;
+            margin-bottom: 3rem;
+            opacity: 0;
+            transition: opacity 1.5s ease;
+        }
+
+        .access-text.visible {
+            opacity: 1;
+        }
+
+        .links {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .links a {
+            color: var(--text);
+            text-decoration: none;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(1.25rem, 4vw, 1.75rem);
+            letter-spacing: 0.2em;
+            opacity: 0;
+            transition: opacity 1.5s ease, color 0.3s ease;
+        }
+
+        .links a.visible {
+            opacity: 1;
+        }
+
+        .links a:hover {
+            color: var(--hover);
         }
 
         button {
@@ -148,6 +187,15 @@
         <p class="response-text">Not enough.</p>
     </div>
 
+    <div id="step-final" class="step">
+        <p id="access-text" class="access-text">You have access.</p>
+        <div class="links">
+            <a href="https://instagram.com/this.imani" target="_blank">Instagram</a>
+            <a href="https://x.com/this_imani_" target="_blank">X</a>
+            <a href="https://www.fanvue.com/this.imani" target="_blank">FanVue</a>
+        </div>
+    </div>
+
     <script>
         function fadeOut(element, callback) {
             element.classList.remove('active');
@@ -165,8 +213,28 @@
 
         function nextStep(current) {
             const currentEl = document.getElementById('step' + current);
-            const nextEl = document.getElementById('step' + (current + 1));
             fadeOut(currentEl, () => showStep('step' + (current + 1)));
+        }
+
+        function showAccessLinks() {
+            const accessText = document.getElementById('access-text');
+            const links = document.querySelectorAll('.links a');
+
+            setTimeout(() => {
+                accessText.classList.add('visible');
+            }, 100);
+
+            setTimeout(() => {
+                links[0].classList.add('visible');
+            }, 2000);
+
+            setTimeout(() => {
+                links[1].classList.add('visible');
+            }, 2500);
+
+            setTimeout(() => {
+                links[2].classList.add('visible');
+            }, 3000);
         }
 
         function selectOption(option, step) {
@@ -180,7 +248,11 @@
                 }
             } else if (step === 3) {
                 if (option === 3) {
-                    window.location.href = 'https://www.fanvue.com/this.imani';
+                    const currentEl = document.getElementById('step3');
+                    fadeOut(currentEl, () => {
+                        showStep('step-final');
+                        showAccessLinks();
+                    });
                 } else {
                     const currentEl = document.getElementById('step3');
                     fadeOut(currentEl, () => showStep('step3-end'));
