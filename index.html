@@ -35,17 +35,31 @@
         body.visible { opacity: 1; }
         #sound-toggle {
             position: fixed;
-            top: 1.2rem;
-            right: 1.2rem;
+            top: 1.5rem;
+            right: 1.5rem;
             z-index: 500;
             cursor: pointer;
             color: var(--accent);
-            opacity: 0.35;
-            font-size: 0.75rem;
-            letter-spacing: 0.05em;
+            opacity: 0.3;
+            font-size: 0.65rem;
+            letter-spacing: 0.2em;
             font-family: 'Cormorant Garamond', Georgia, serif;
             background: none;
             border: none;
+        }
+        #sound-toggle.active { opacity: 0.7; }
+        #countdown-timer {
+            position: fixed;
+            top: 1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 500;
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 0.9rem;
+            color: #c9a84c;
+            opacity: 0.5;
+            letter-spacing: 0.1em;
+            display: none;
         }
         #bg {
             position: fixed;
@@ -192,7 +206,8 @@
     </style>
 </head>
 <body>
-    <button id="sound-toggle">♪ off</button>
+    <button id="sound-toggle">sound</button>
+    <div id="countdown-timer">0:30</div>
     <div id="bg"></div>
     <div id="landscape-lock">Rotate your phone.</div>
     <div id="cursor"></div>
@@ -242,11 +257,15 @@
             var bg = document.getElementById('bg');
             var cursor = document.getElementById('cursor');
             var soundToggle = document.getElementById('sound-toggle');
+            var countdownTimer = document.getElementById('countdown-timer');
             var exitIntentTriggered = false;
             var hesitationTimer = null;
+            var countdownInterval = null;
             var audioCtx = null;
             var soundEnabled = false;
             var clickInitialized = false;
+            var isReturningVisitor = localStorage.getItem('imani_visited') ? true : false;
+            var timerStarted = false;
 
             function va(eventName, value) {
                 if (window.va) {
@@ -280,7 +299,8 @@
             soundToggle.addEventListener('click', function() {
                 initAudio();
                 soundEnabled = !soundEnabled;
-                soundToggle.textContent = soundEnabled ? '♪ on' : '♪ off';
+                soundToggle.textContent = soundEnabled ? 'sound ●' : 'sound';
+                soundToggle.classList.toggle('active', soundEnabled);
             });
 
             function haptic(type) {
@@ -317,8 +337,31 @@
                 exitIntentTriggered = true;
             }
 
+            function startCountdown() {
+                if (timerStarted) return;
+                timerStarted = true;
+                countdownTimer.style.display = 'block';
+                var timeLeft = 30;
+                countdownInterval = setInterval(function() {
+                    countdownTimer.textContent = '0:' + (timeLeft < 10 ? '0' : '') + timeLeft;
+                    timeLeft--;
+                    if (timeLeft < 0) {
+                        clearInterval(countdownInterval);
+                        window.location.href = '/closed.html';
+                    }
+                }, 1000);
+            }
+
+            function stopCountdown() {
+                if (countdownInterval) {
+                    clearInterval(countdownInterval);
+                }
+                countdownTimer.style.display = 'none';
+            }
+
             function startHesitation(stepNum) {
                 clearTimeout(hesitationTimer);
+                console.log('hesitation timer started for step ' + stepNum);
                 var el = document.getElementById('hesitation-step' + stepNum);
                 hesitationTimer = setTimeout(function() {
                     if (el) {
@@ -335,8 +378,6 @@
 
             // Start background fade immediately
             bg.classList.add('loaded');
-
-            // Make body visible
             document.body.classList.add('visible');
 
             // Click tracking
@@ -360,6 +401,10 @@
                 });
                 document.querySelector('#fanvue-link').onclick = function() { va('fanvue_clicked'); };
             } else {
+                if (isReturningVisitor) {
+                    startCountdown();
+                }
+
                 if (window.matchMedia('(pointer: fine)').matches) {
                     document.addEventListener('mousemove', function(e) {
                         cursor.style.left = e.clientX + 'px';
@@ -384,6 +429,7 @@
                 function startStep2() {
                     va('step2_reached');
                     localStorage.setItem('step2_time', Date.now());
+                    clearTimeout(hesitationTimer);
                     typeText(document.getElementById('step2-text'), "Why are you here?", 50);
                     setTimeout(function() {
                         document.querySelectorAll('.step2-btn').forEach(function(btn, i) {
@@ -404,6 +450,7 @@
                 function startStep3() {
                     va('step3_reached');
                     localStorage.setItem('step3_time', Date.now());
+                    clearTimeout(hesitationTimer);
                     typeText(document.getElementById('step3-text'), "What are you willing to offer?", 50);
                     document.querySelectorAll('.step3-btn').forEach(function(btn, i) {
                         showButton(btn, i * 400);
@@ -426,6 +473,7 @@
                     va('step3_duration_sec', Math.round(s3/1000));
                     va('access_granted');
                     haptic('correct');
+                    stopCountdown();
                     sessionStorage.setItem('imani_access', 'granted');
                     typeText(document.getElementById('final-access'), "You have access.", 50);
                     fadeIn(document.getElementById('final-sub'), 1000);
@@ -439,6 +487,7 @@
                     clearTimeout(hesitationTimer);
                     if (step === 1) {
                         va('step1_entered');
+                        if (isReturningVisitor) startCountdown();
                         var el = document.getElementById('step1');
                         el.classList.add('slide-up');
                         setTimeout(function() {
