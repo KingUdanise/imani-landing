@@ -86,14 +86,16 @@
         
         .sub-text {
             font-size: 0.85rem;
-            opacity: 0.7;
+            opacity: 0;
             margin-bottom: 1.5rem;
+            transition: opacity 0.8s ease;
         }
         
         .extra-text {
             font-size: 0.8rem;
-            opacity: 0.6;
+            opacity: 0;
             margin-top: 1rem;
+            transition: opacity 0.8s ease;
         }
         
         .links {
@@ -108,6 +110,8 @@
             text-decoration: none;
             font-size: 1.1rem;
             letter-spacing: 0.15em;
+            opacity: 0;
+            transition: opacity 0.8s ease;
         }
         
         .links a:hover {
@@ -132,6 +136,8 @@
             pointer-events: auto;
             position: relative;
             z-index: 20;
+            opacity: 0;
+            transition: opacity 0.8s ease;
         }
         
         button:hover {
@@ -472,6 +478,18 @@
             type();
         }
         
+        function fadeIn(element, delay) {
+            delay = delay || 0;
+            setTimeout(function() {
+                element.style.opacity = '0';
+                element.style.display = 'block';
+                element.style.transition = 'opacity 0.8s ease';
+                setTimeout(function() {
+                    element.style.opacity = '1';
+                }, 50);
+            }, delay);
+        }
+        
         // SHOW STEP
         function showStep(stepId) {
             document.querySelectorAll('.step').forEach(function(s) { 
@@ -509,9 +527,9 @@
             showStep('step2');
             typeText(document.getElementById('step2-q'), "Why are you here?", 50, function() {
                 var btns = document.querySelectorAll('#step2 button');
-                btns[0].style.display = 'block';
-                setTimeout(function() { btns[1].style.display = 'block'; }, 400);
-                setTimeout(function() { btns[2].style.display = 'block'; }, 800);
+                fadeIn(btns[0], 0);
+                fadeIn(btns[1], 300);
+                fadeIn(btns[2], 600);
                 setTimeout(startHesTimer, 1500);
             });
         }
@@ -535,16 +553,16 @@
                 showStep('step3');
                 typeText(document.getElementById('step3-q'), "What are you willing to offer?", 50, function() {
                     var btns = document.querySelectorAll('#step3 button');
-                    btns[0].style.display = 'block';
-                    setTimeout(function() { btns[1].style.display = 'block'; }, 400);
-                    setTimeout(function() { btns[2].style.display = 'block'; }, 800);
+                    fadeIn(btns[0], 0);
+                    fadeIn(btns[1], 300);
+                    fadeIn(btns[2], 600);
                     setTimeout(startHesTimer, 1500);
                 });
             } else {
                 showStep('step2-fail');
                 typeText(document.getElementById('step2fail-q'), "Then you're not ready.", 50, function() {
                     setTimeout(function() {
-                        document.getElementById('step2fail-extra').textContent = 'Access closes in 24 hours.';
+                        fadeIn(document.getElementById('step2fail-extra'), 0);
                     }, 1500);
                 });
             }
@@ -569,20 +587,20 @@
                 showStep('step-access');
                 sessionStorage.setItem('imani_access', 'granted');
                 stopReturnTimer();
-                document.getElementById('access-sub').style.display = 'block';
+                fadeIn(document.getElementById('access-sub'), 0);
                 typeText(document.getElementById('access-h1'), "You have access.", 50, function() {
                     setTimeout(function() {
                         var links = document.querySelectorAll('#step-access .links a');
-                        links[0].style.display = 'block';
-                        setTimeout(function() { links[1].style.display = 'block'; }, 600);
-                        setTimeout(function() { links[2].style.display = 'block'; }, 1200);
+                        fadeIn(links[0], 0);
+                        fadeIn(links[1], 300);
+                        fadeIn(links[2], 600);
                     }, 1000);
                 });
             } else {
                 showStep('step3-fail');
                 typeText(document.getElementById('step3fail-q'), "Not enough.", 50, function() {
                     setTimeout(function() {
-                        document.getElementById('step3fail-extra').textContent = 'Those who understand value don\'t hesitate.';
+                        fadeIn(document.getElementById('step3fail-extra'), 0);
                     }, 1500);
                 });
             }
@@ -595,11 +613,11 @@
             if (sessionStorage.getItem('imani_access') === 'granted') {
                 showStep('step-access');
                 document.getElementById('access-h1').textContent = 'You have access.';
-                document.getElementById('access-sub').style.display = 'block';
+                fadeIn(document.getElementById('access-sub'), 0);
                 var links = document.querySelectorAll('#step-access .links a');
-                links[0].style.display = 'block';
-                links[1].style.display = 'block';
-                links[2].style.display = 'block';
+                fadeIn(links[0], 0);
+                fadeIn(links[1], 300);
+                fadeIn(links[2], 600);
                 return;
             }
             
@@ -612,7 +630,7 @@
                     document.getElementById('step1-h1').innerHTML += '<br>';
                     typeText(document.getElementById('step1-h1'), "It's a response.", 50, function() {
                         setTimeout(function() {
-                            document.querySelector('#step1 button').style.display = 'block';
+                            fadeIn(document.querySelector('#step1 button'), 0);
                         }, 1200);
                     });
                 }, 800);
