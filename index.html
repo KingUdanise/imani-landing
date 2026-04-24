@@ -16,7 +16,7 @@
     <script defer src="/_vercel/insights/script.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body { height: 100%; }
+        html, body { height: 100%; width: 100%; overflow: hidden; margin: 0; padding: 0; }
         body {
             background-color: #0a0a0a;
             color: white;
@@ -26,8 +26,6 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            padding: 2rem;
-            overflow-x: hidden;
             position: relative;
         }
         
@@ -39,7 +37,6 @@
             background-image: url('./background.jpg');
             background-size: cover;
             background-position: center center;
-            background-attachment: fixed;
             z-index: 0;
             opacity: 0;
             transition: opacity 1.5s ease;
@@ -53,20 +50,26 @@
             position: fixed;
             top: 0; left: 0;
             width: 100%; height: 100%;
-            background: rgba(0,0,0,0.80);
+            background: rgba(0,0,0,0.78);
             z-index: 1;
             pointer-events: none;
         }
         
         .step {
             display: none;
-            flex-direction: column;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%;
+            height: 100%;
             align-items: center;
             justify-content: center;
-            width: 100%;
+            flex-direction: column;
+            text-align: center;
             padding: 2rem;
-            position: absolute;
+            box-sizing: border-box;
+            overflow: hidden;
             z-index: 10;
+            transition: opacity 0.5s ease;
         }
         
         .step.active {
@@ -74,7 +77,7 @@
         }
         
         h1, .question {
-            font-size: clamp(1.5rem, 5vw, 2.5rem);
+            font-size: clamp(1.3rem, 4vw, 2rem);
             text-align: center;
             letter-spacing: 0.05em;
             line-height: 1.6;
@@ -118,15 +121,17 @@
             border: 1px solid rgba(255,255,255,0.5);
             color: white;
             font-family: 'Cormorant Garamond', Georgia, serif;
-            font-size: clamp(0.9rem, 3vw, 1.1rem);
+            font-size: clamp(0.85rem, 2.5vw, 1.1rem);
             padding: 1rem 2rem;
             letter-spacing: 0.1em;
-            width: min(320px, 85vw);
-            min-height: 56px;
+            width: min(300px, 80vw);
+            min-height: 50px;
             display: block;
             margin: 0.8rem auto;
             cursor: pointer;
             pointer-events: auto;
+            position: relative;
+            z-index: 20;
         }
         
         button:hover {
@@ -169,7 +174,7 @@
             top: 1.2rem;
             left: 50%;
             transform: translateX(-50%);
-            z-index: 30;
+            z-index: 40;
             font-family: 'Cormorant Garamond', Georgia, serif;
             font-size: 0.9rem;
             color: #c9a84c;
@@ -178,33 +183,24 @@
             pointer-events: none;
         }
         
-        #hes-text {
+        /* HESITATION TEXT */
+        #hesitation-text {
             display: none;
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            z-index: 25;
+            z-index: 60;
             text-align: center;
             font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: clamp(1.2rem, 4vw, 1.8rem);
             color: white;
-            font-size: 1rem;
-            letter-spacing: 0.1em;
+            letter-spacing: 0.08em;
+            opacity: 0;
+            transition: opacity 0.6s ease;
             pointer-events: none;
-        }
-        
-        #hes-count {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 25;
-            text-align: center;
-            font-family: 'Cormorant Garamond', Georgia, serif;
-            color: #c9a84c;
-            font-size: 4rem;
-            pointer-events: none;
+            width: 80%;
+            max-width: 500px;
         }
         
         .try-link {
@@ -222,8 +218,10 @@
         
         .try-link:hover { opacity: 0.8; }
         
-        @media (max-width: 768px) {
-            #bg { background-attachment: scroll; background-position: center top; }
+        @media (max-height: 600px) {
+            h1, .question { font-size: clamp(1.1rem, 3.4vw, 1.7rem); }
+            button { min-height: 40px; }
+            .links { gap: 0.5rem; margin-top: 1rem; }
         }
     </style>
 </head>
@@ -233,8 +231,7 @@
     <button id="sound-toggle">sound</button>
     <div id="return-timer"></div>
     <div id="cursor"></div>
-    <div id="hes-text"></div>
-    <div id="hes-count"></div>
+    <div id="hesitation-text"></div>
     
     <!-- STEP 1 -->
     <div class="step" id="step1" style="display:flex;">
@@ -328,11 +325,17 @@
             document.body.appendChild(banner);
         }
         
-        // HESITATION TIMER
+        // HESITATION
         var hesTimer = null;
+        var hesitationActive = false;
+        
+        function cancelHesitationTimer() {
+            if (hesTimer) { clearTimeout(hesTimer); hesTimer = null; }
+            hesitationActive = false;
+        }
         
         function startHesTimer() {
-            clearHesTimer();
+            cancelHesitationTimer();
             hesTimer = setTimeout(runHesSequence, 8000);
         }
         
@@ -341,41 +344,90 @@
         }
         
         function runHesSequence() {
-            var activeStep = document.querySelector('.step[style*="flex"], .step.active');
+            var activeStep = document.querySelector('.step.active');
             if (!activeStep) return;
-            var buttons = activeStep.querySelectorAll('button:not(.trylink)');
-            buttons.forEach(function(b) { b.style.display = 'none'; });
+            hesitationActive = true;
             
-            var texts = ["You're still thinking.", "That's already an answer.", "The ones who belong here don't hesitate.", "Access is closing."];
-            var hesDiv = document.getElementById('hes-text');
-            hesDiv.style.display = 'block';
+            activeStep.style.transition = 'opacity 0.5s ease';
+            activeStep.style.opacity = '0';
+            setTimeout(function() {
+                activeStep.style.display = 'none';
+            }, 500);
             
+            var timerEl = document.getElementById('return-timer');
+            if (timerEl) timerEl.style.display = 'none';
+            
+            if (!hesitationActive) return;
+            showHesitationMessage("You're still thinking.", 2600, function() {
+                if (!hesitationActive) return;
+                showHesitationMessage("That's already an answer.", 2600, function() {
+                    if (!hesitationActive) return;
+                    showHesitationMessage("The ones who belong here don't hesitate.", 2600, function() {
+                        if (!hesitationActive) return;
+                        showHesitationMessage("Access is closing.", 2100, function() {
+                            if (!hesitationActive) return;
+                            showCountdown();
+                        });
+                    });
+                });
+            });
+        }
+        
+        function showHesitationMessage(text, duration, callback) {
+            if (!hesitationActive) return;
+            var el = document.getElementById('hesitation-text');
+            el.style.display = 'block';
+            el.style.fontSize = 'clamp(1.2rem, 4vw, 1.8rem)';
+            el.style.color = 'white';
+            el.textContent = text;
+            el.style.opacity = '0';
+            setTimeout(function() { el.style.opacity = '1'; }, 50);
+            setTimeout(function() {
+                el.style.opacity = '0';
+                setTimeout(function() { if (callback) callback(); }, 400);
+            }, duration);
+        }
+        
+        function showCountdown() {
+            if (!hesitationActive) return;
+            var el = document.getElementById('hesitation-text');
+            var numbers = ['5','4','3','2','1'];
             var i = 0;
-            function showNext() {
-                if (i < texts.length) {
-                    hesDiv.textContent = texts[i];
-                    i++;
-                    setTimeout(showNext, 2000);
-                } else {
-                    var count = 5;
-                    var countEl = document.getElementById('hes-count');
-                    countEl.style.display = 'block';
-                    var countInterval = setInterval(function() {
-                        countEl.textContent = count;
-                        count--;
-                        if (count < 0) {
-                            clearInterval(countInterval);
-                            countEl.style.display = 'none';
-                            hesDiv.textContent = 'Access closed.';
-                            setTimeout(function() {
-                                localStorage.setItem('imani_visited', 'true');
-                                window.location.href = '/closed.html';
-                            }, 1500);
-                        }
-                    }, 1000);
+            
+            function showNumber() {
+                if (!hesitationActive) return;
+                if (i >= numbers.length) {
+                    showFinalMessage();
+                    return;
                 }
+                el.style.fontSize = '4rem';
+                el.style.color = '#c9a84c';
+                el.textContent = numbers[i];
+                el.style.opacity = '0';
+                setTimeout(function() { el.style.opacity = '1'; }, 50);
+                setTimeout(function() {
+                    el.style.opacity = '0';
+                    setTimeout(function() {
+                        i++;
+                        showNumber();
+                    }, 200);
+                }, 900);
             }
-            showNext();
+            showNumber();
+        }
+        
+        function showFinalMessage() {
+            if (!hesitationActive) return;
+            var el = document.getElementById('hesitation-text');
+            el.style.fontSize = 'clamp(1.2rem, 4vw, 1.8rem)';
+            el.style.color = 'white';
+            el.textContent = 'Access closed.';
+            el.style.opacity = '0';
+            setTimeout(function() { el.style.opacity = '1'; }, 50);
+            setTimeout(function() {
+                localStorage.setItem('imani_visited', 'true');
+                window.location.href = '/closed.html';
+            }, 2000);
         }
         
         // RETURNING VISITOR TIMER
@@ -399,7 +451,8 @@
         
         function stopReturnTimer() {
             if (returnTimer) { clearInterval(returnTimer); returnTimer = null; }
-            document.getElementById('return-timer').style.display = 'none';
+            var t = document.getElementById('return-timer');
+            if (t) t.style.display = 'none';
         }
         
         // TYPEWRITER
@@ -421,9 +474,14 @@
         
         // SHOW STEP
         function showStep(stepId) {
-            document.querySelectorAll('.step').forEach(function(s) { s.classList.remove('active'); s.style.display = 'none'; });
-            document.getElementById(stepId).style.display = 'flex';
-            document.getElementById(stepId).classList.add('active');
+            document.querySelectorAll('.step').forEach(function(s) { 
+                s.classList.remove('active'); 
+                s.style.display = 'none'; 
+                s.style.opacity = '1';
+            });
+            var step = document.getElementById(stepId);
+            step.style.display = 'flex';
+            step.classList.add('active');
         }
         
         // TRY AGAIN
@@ -434,6 +492,19 @@
         
         // STEP NAVIGATION
         function goStep2() {
+            if (hesitationActive) {
+                hesitationActive = false;
+                var el = document.getElementById('hesitation-text');
+                el.style.opacity = '0';
+                setTimeout(function() { el.style.display = 'none'; }, 600);
+                var activeStep = document.querySelector('.step.active');
+                if (activeStep) {
+                    activeStep.style.display = 'flex';
+                    activeStep.style.opacity = '1';
+                }
+                var timer = document.getElementById('return-timer');
+                if (timer) timer.style.display = 'block';
+            }
             clearHesTimer();
             showStep('step2');
             typeText(document.getElementById('step2-q'), "Why are you here?", 50, function() {
@@ -446,6 +517,19 @@
         }
         
         function selectStep2(opt) {
+            if (hesitationActive) {
+                hesitationActive = false;
+                var el = document.getElementById('hesitation-text');
+                el.style.opacity = '0';
+                setTimeout(function() { el.style.display = 'none'; }, 600);
+                var activeStep = document.querySelector('.step.active');
+                if (activeStep) {
+                    activeStep.style.display = 'flex';
+                    activeStep.style.opacity = '1';
+                }
+                var timer = document.getElementById('return-timer');
+                if (timer) timer.style.display = 'block';
+            }
             clearHesTimer();
             if (opt === 1) {
                 showStep('step3');
@@ -467,6 +551,19 @@
         }
         
         function selectStep3(opt) {
+            if (hesitationActive) {
+                hesitationActive = false;
+                var el = document.getElementById('hesitation-text');
+                el.style.opacity = '0';
+                setTimeout(function() { el.style.display = 'none'; }, 600);
+                var activeStep = document.querySelector('.step.active');
+                if (activeStep) {
+                    activeStep.style.display = 'flex';
+                    activeStep.style.opacity = '1';
+                }
+                var timer = document.getElementById('return-timer');
+                if (timer) timer.style.display = 'block';
+            }
             clearHesTimer();
             if (opt === 3) {
                 showStep('step-access');
@@ -498,6 +595,7 @@
             if (sessionStorage.getItem('imani_access') === 'granted') {
                 showStep('step-access');
                 document.getElementById('access-h1').textContent = 'You have access.';
+                document.getElementById('access-sub').style.display = 'block';
                 var links = document.querySelectorAll('#step-access .links a');
                 links[0].style.display = 'block';
                 links[1].style.display = 'block';
