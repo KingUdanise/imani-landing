@@ -29,7 +29,6 @@
             position: relative;
         }
         
-        /* Z-INDEX HIERARCHY */
         #bg {
             position: fixed;
             top: 0; left: 0;
@@ -42,9 +41,7 @@
             transition: opacity 1.5s ease;
         }
         
-        #bg.loaded {
-            opacity: 1;
-        }
+        #bg.loaded { opacity: 1; }
         
         #overlay {
             position: fixed;
@@ -55,7 +52,7 @@
             pointer-events: none;
         }
         
-        .step {
+        #step1, #step2, #step3, #rejection, #final, #hesitation-overlay {
             display: none;
             position: fixed;
             top: 0; left: 0;
@@ -69,33 +66,60 @@
             box-sizing: border-box;
             overflow: hidden;
             z-index: 10;
-            transition: opacity 0.5s ease;
         }
         
-        .step.active {
-            display: flex;
-        }
+        #step1 { display: flex; }
         
-        h1, .question {
+        #step1-text1, #step1-text2, #step2-question, #step3-question, #rejection-text, #final-text1 {
             font-size: clamp(1.3rem, 4vw, 2rem);
-            text-align: center;
             letter-spacing: 0.05em;
             line-height: 1.6;
+            margin-bottom: 0.5rem;
+        }
+        
+        #step2-question, #step3-question {
             margin-bottom: 2rem;
         }
         
-        .sub-text {
+        #final-text2 {
             font-size: 0.85rem;
-            opacity: 0;
-            margin-bottom: 1.5rem;
-            transition: opacity 0.8s ease;
+            margin-top: 1rem;
+            visibility: hidden;
         }
         
-        .extra-text {
-            font-size: 0.8rem;
+        .step-btn {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.5);
+            color: white;
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: clamp(0.85rem, 2.5vw, 1.1rem);
+            padding: 1rem 2rem;
+            letter-spacing: 0.1em;
+            width: min(300px, 80vw);
+            min-height: 50px;
+            display: block;
+            margin: 0.8rem auto;
+            cursor: pointer;
+            visibility: hidden;
+            transition: opacity 0.8s ease, background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .step-btn:hover {
+            background: rgba(255,255,255,0.06);
+            border-color: white;
+        }
+        
+        #step1-btn {
             opacity: 0;
-            margin-top: 1rem;
-            transition: opacity 0.8s ease;
+            visibility: hidden;
+        }
+        
+        .options {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.8rem;
+            margin-top: 2rem;
         }
         
         .links {
@@ -110,7 +134,7 @@
             text-decoration: none;
             font-size: 1.1rem;
             letter-spacing: 0.15em;
-            opacity: 0;
+            visibility: hidden;
             transition: opacity 0.8s ease;
         }
         
@@ -119,42 +143,24 @@
             text-decoration-color: #c9a84c;
         }
         
-        .options {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.8rem;
-            margin-top: 2rem;
-        }
-        
-        /* BUTTONS */
-        button {
-            background: transparent;
-            border: 1px solid rgba(255,255,255,0.5);
-            color: white;
-            font-family: 'Cormorant Garamond', Georgia, serif;
-            font-size: clamp(0.85rem, 2.5vw, 1.1rem);
-            padding: 1rem 2rem;
-            letter-spacing: 0.1em;
-            width: min(300px, 80vw);
-            min-height: 50px;
-            display: block;
-            margin: 0.8rem auto;
-            cursor: pointer;
-            pointer-events: auto;
-            position: relative;
-            z-index: 20;
-            opacity: 0;
+        #rejection-sub, #rejection-retry {
+            font-size: 0.85rem;
+            margin-top: 1.5rem;
             visibility: hidden;
-            transition: opacity 0.8s ease;
         }
         
-        button:hover {
-            background: rgba(255,255,255,0.06);
-            border-color: white;
+        #rejection-retry {
+            color: white;
+            opacity: 0.5;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            letter-spacing: 0.12em;
         }
         
-        /* UI ELEMENTS */
+        #rejection-retry:hover { opacity: 0.8; }
+        
         #sound-toggle {
             position: fixed;
             top: 1.2rem;
@@ -196,46 +202,50 @@
             opacity: 0.6;
             letter-spacing: 0.15em;
             pointer-events: none;
+            display: none;
         }
         
-        /* HESITATION TEXT */
-        #hesitation-text {
-            display: none;
+        #hesitation-overlay {
             position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95);
             z-index: 60;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #hesitation-text {
             text-align: center;
             font-family: 'Cormorant Garamond', Georgia, serif;
             font-size: clamp(1.2rem, 4vw, 1.8rem);
             color: white;
             letter-spacing: 0.08em;
-            opacity: 0;
             transition: opacity 0.6s ease;
-            pointer-events: none;
-            width: 80%;
-            max-width: 500px;
         }
         
-        .try-link {
+        #exit-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 70;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             color: white;
-            opacity: 0.5;
-            font-size: 0.78rem;
-            cursor: pointer;
             font-family: 'Cormorant Garamond', Georgia, serif;
-            letter-spacing: 0.12em;
-            background: none;
-            border: none;
-            margin-top: 1.5rem;
-            text-decoration: none;
+            text-align: center;
+            font-size: clamp(1.2rem, 4vw, 1.8rem);
+            letter-spacing: 0.08em;
         }
-        
-        .try-link:hover { opacity: 0.8; }
         
         @media (max-height: 600px) {
-            h1, .question { font-size: clamp(1.1rem, 3.4vw, 1.7rem); }
-            button { min-height: 40px; }
+            #step1-text1, #step1-text2, #step2-question, #step3-question { font-size: clamp(1.1rem, 3.4vw, 1.7rem); }
+            .step-btn { min-height: 40px; }
             .links { gap: 0.5rem; margin-top: 1rem; }
         }
     </style>
@@ -246,419 +256,521 @@
     <button id="sound-toggle">sound</button>
     <div id="return-timer"></div>
     <div id="cursor"></div>
-    <div id="hesitation-text"></div>
     
     <!-- STEP 1 -->
-    <div class="step" id="step1" style="display:flex;">
-        <h1 id="step1-h1"></h1>
-        <button onclick="goStep2()" style="display:none">I'm ready.</button>
+    <div id="step1">
+        <p id="step1-text1"></p>
+        <p id="step1-text2"></p>
+        <button id="step1-btn" class="step-btn">I'm ready.</button>
     </div>
     
     <!-- STEP 2 -->
-    <div class="step" id="step2">
-        <p class="question" id="step2-q"></p>
-        <div class="options">
-            <button onclick="selectStep2(1)" style="opacity:0;visibility:hidden">I recognize value when I see it.</button>
-            <button onclick="selectStep2(2)" style="opacity:0;visibility:hidden">I need to understand first.</button>
-            <button onclick="selectStep2(3)" style="opacity:0;visibility:hidden">I'm just curious.</button>
+    <div id="step2">
+        <p id="step2-question"></p>
+        <div id="step2-options" class="options">
+            <button id="step2-btn1" class="step-btn">I recognize value when I see it.</button>
+            <button id="step2-btn2" class="step-btn">I need to understand first.</button>
+            <button id="step2-btn3" class="step-btn">I'm just curious.</button>
         </div>
-    </div>
-    
-    <!-- STEP 2 FAIL -->
-    <div class="step" id="step2-fail">
-        <p class="question" id="step2fail-q"></p>
-        <p class="extra-text" id="step2fail-extra"></p>
-        <button class="trylink" onclick="tryAgain()">Try again.</button>
     </div>
     
     <!-- STEP 3 -->
-    <div class="step" id="step3">
-        <p class="question" id="step3-q"></p>
+    <div id="step3">
+        <p id="step3-question"></p>
         <div class="options">
-            <button onclick="selectStep3(1)" style="opacity:0;visibility:hidden">My attention.</button>
-            <button onclick="selectStep3(2)" style="opacity:0;visibility:hidden">My time.</button>
-            <button onclick="selectStep3(3)" style="opacity:0;visibility:hidden">My resources.</button>
+            <button id="step3-btn1" class="step-btn">My attention.</button>
+            <button id="step3-btn2" class="step-btn">My time.</button>
+            <button id="step3-btn3" class="step-btn">My resources.</button>
         </div>
     </div>
     
-    <!-- STEP 3 FAIL -->
-    <div class="step" id="step3-fail">
-        <p class="question" id="step3fail-q"></p>
-        <p class="extra-text" id="step3fail-extra"></p>
-        <button class="trylink" onclick="tryAgain()">Try again.</button>
+    <!-- REJECTION -->
+    <div id="rejection">
+        <p id="rejection-text"></p>
+        <p id="rejection-sub">Access closes in 24 hours.</p>
+        <button id="rejection-retry">Try again.</button>
     </div>
     
-    <!-- STEP ACCESS -->
-    <div class="step" id="step-access">
-        <h1 id="access-h1"></h1>
-        <p class="sub-text" id="access-sub" style="display:none">You're one of few.</p>
+    <!-- FINAL -->
+    <div id="final">
+        <p id="final-text1"></p>
+        <p id="final-text2">You're one of few.</p>
         <div class="links">
-            <a href="https://instagram.com/this.imani" target="_blank" style="display:none">Instagram</a>
-            <a href="https://x.com/this_imani_" target="_blank" style="display:none">X</a>
-            <a href="https://www.fanvue.com/this.imani" target="_blank" style="display:none">Claim your access →</a>
+            <a id="final-link1" href="https://instagram.com/this.imani" target="_blank">Instagram</a>
+            <a id="final-link2" href="https://x.com/this_imani_" target="_blank">X</a>
+            <a id="final-link3" href="https://www.fanvue.com/this.imani" target="_blank">Claim your access</a>
         </div>
     </div>
+    
+    <!-- HESITATION OVERLAY -->
+    <div id="hesitation-overlay">
+        <p id="hesitation-text"></p>
+    </div>
+    
+    <!-- EXIT OVERLAY -->
+    <div id="exit-overlay">Access is not a right.</div>
     
     <script>
-        // SOUND
-        var soundOn = false;
-        var audioCtx = null;
-        
-        document.getElementById('sound-toggle').onclick = function() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            }
-            soundOn = !soundOn;
-            document.getElementById('sound-toggle').textContent = soundOn ? 'sound ●' : 'sound';
-        };
-        
-        function playTick() {
-            if (!soundOn || !audioCtx) return;
-            var osc = audioCtx.createOscillator();
-            var gain = audioCtx.createGain();
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.frequency.value = 600;
-            gain.gain.setValueAtTime(0.025, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.04);
-        }
-        
-        // CURSOR
-        if (window.matchMedia('(pointer: fine)').matches) {
-            var cur = document.getElementById('cursor');
-            cur.style.display = 'block';
-            document.addEventListener('mousemove', function(e) {
-                cur.style.left = e.clientX + 'px';
-                cur.style.top = e.clientY + 'px';
-            });
-        }
-        
-        // INSTAGRAM BANNER
-        if (/Instagram|FBAN|FBAV/.test(navigator.userAgent)) {
-            var banner = document.createElement('div');
-            banner.textContent = 'For best experience, open in Safari or Chrome';
-            banner.style.cssText = 'position:fixed;bottom:0;left:0;width:100%;text-align:center;font-size:0.6rem;color:white;opacity:0.35;padding:0.6rem;z-index:1000;cursor:pointer;font-family:Cormorant Garamond,Georgia,serif;letter-spacing:0.1em;';
-            banner.onclick = function() { banner.style.display = 'none'; };
-            document.body.appendChild(banner);
-        }
-        
-        // HESITATION
-        var hesTimer = null;
-        var hesitationActive = false;
-        
-        function cancelHesitationTimer() {
-            if (hesTimer) { clearTimeout(hesTimer); hesTimer = null; }
-            hesitationActive = false;
-        }
-        
-        function startHesTimer() {
-            cancelHesitationTimer();
-            hesTimer = setTimeout(runHesSequence, 8000);
-        }
-        
-        function clearHesTimer() {
-            if (hesTimer) { clearTimeout(hesTimer); hesTimer = null; }
-        }
-        
-        function runHesSequence() {
-            var activeStep = document.querySelector('.step.active');
-            if (!activeStep) return;
-            hesitationActive = true;
-            
-            activeStep.style.transition = 'opacity 0.5s ease';
-            activeStep.style.opacity = '0';
-            setTimeout(function() {
-                activeStep.style.display = 'none';
-            }, 500);
-            
-            var timerEl = document.getElementById('return-timer');
-            if (timerEl) timerEl.style.display = 'none';
-            
-            if (!hesitationActive) return;
-            showHesitationMessage("You're still thinking.", 2600, function() {
-                if (!hesitationActive) return;
-                showHesitationMessage("That's already an answer.", 2600, function() {
-                    if (!hesitationActive) return;
-                    showHesitationMessage("The ones who belong here don't hesitate.", 2600, function() {
-                        if (!hesitationActive) return;
-                        showHesitationMessage("Access is closing.", 2100, function() {
-                            if (!hesitationActive) return;
-                            showCountdown();
-                        });
-                    });
-                });
-            });
-        }
-        
-        function showHesitationMessage(text, duration, callback) {
-            if (!hesitationActive) return;
-            var el = document.getElementById('hesitation-text');
-            el.style.display = 'block';
-            el.style.fontSize = 'clamp(1.2rem, 4vw, 1.8rem)';
-            el.style.color = 'white';
-            el.textContent = text;
-            el.style.opacity = '0';
-            setTimeout(function() { el.style.opacity = '1'; }, 50);
-            setTimeout(function() {
-                el.style.opacity = '0';
-                setTimeout(function() { if (callback) callback(); }, 400);
-            }, duration);
-        }
-        
-        function showCountdown() {
-            if (!hesitationActive) return;
-            var el = document.getElementById('hesitation-text');
-            var numbers = ['5','4','3','2','1'];
-            var i = 0;
-            
-            function showNumber() {
-                if (!hesitationActive) return;
-                if (i >= numbers.length) {
-                    showFinalMessage();
-                    return;
-                }
-                el.style.fontSize = '4rem';
-                el.style.color = '#c9a84c';
-                el.textContent = numbers[i];
-                el.style.opacity = '0';
-                setTimeout(function() { el.style.opacity = '1'; }, 50);
-                setTimeout(function() {
-                    el.style.opacity = '0';
-                    setTimeout(function() {
-                        i++;
-                        showNumber();
-                    }, 200);
-                }, 900);
-            }
-            showNumber();
-        }
-        
-        function showFinalMessage() {
-            if (!hesitationActive) return;
-            var el = document.getElementById('hesitation-text');
-            el.style.fontSize = 'clamp(1.2rem, 4vw, 1.8rem)';
-            el.style.color = 'white';
-            el.textContent = 'Access closed.';
-            el.style.opacity = '0';
-            setTimeout(function() { el.style.opacity = '1'; }, 50);
-            setTimeout(function() {
-                localStorage.setItem('imani_visited', 'true');
-                window.location.href = '/closed.html';
-            }, 2000);
-        }
-        
-        // RETURNING VISITOR TIMER
-        var returnTimer = null;
-        
-        function startReturnTimer() {
-            var seconds = 30;
-            var timerEl = document.getElementById('return-timer');
-            timerEl.textContent = '0:30';
-            timerEl.style.display = 'block';
-            returnTimer = setInterval(function() {
-                seconds--;
-                var secs = seconds % 60;
-                timerEl.textContent = '0:' + (secs < 10 ? '0' : '') + secs;
-                if (seconds <= 0) {
-                    clearInterval(returnTimer);
-                    window.location.href = '/closed.html';
-                }
-            }, 1000);
-        }
-        
-        function stopReturnTimer() {
-            if (returnTimer) { clearInterval(returnTimer); returnTimer = null; }
-            var t = document.getElementById('return-timer');
-            if (t) t.style.display = 'none';
-        }
-        
-        // TYPEWRITER
-        function typeText(element, text, speed, callback) {
-            element.textContent = '';
-            var i = 0;
-            function type() {
-                if (i < text.length) {
-                    element.textContent += text.charAt(i);
-                    playTick();
-                    i++;
-                    setTimeout(type, speed);
-                } else if (callback) {
-                    setTimeout(callback, speed);
-                }
-            }
-            type();
-        }
-        
-        function fadeIn(element, delay) {
-            delay = delay || 0;
-            setTimeout(function() {
-                element.style.opacity = '0';
-                element.style.display = 'block';
-                element.style.transition = 'opacity 0.8s ease';
-                setTimeout(function() {
-                    element.style.opacity = '1';
-                }, 50);
-            }, delay);
-        }
-        
-        function fadeInButton(element, delay) {
-            setTimeout(function() {
-                element.style.transition = 'opacity 0.8s ease';
-                element.style.visibility = 'visible';
-                element.style.opacity = '1';
-            }, delay);
-        }
-        
-        // SHOW STEP
-        function showStep(stepId) {
-            document.querySelectorAll('.step').forEach(function(s) { 
-                s.classList.remove('active'); 
-                s.style.display = 'none'; 
-                s.style.opacity = '1';
-            });
-            var step = document.getElementById(stepId);
-            step.style.display = 'flex';
-            step.classList.add('active');
-        }
-        
-        // TRY AGAIN
-        function tryAgain() {
-            sessionStorage.removeItem('imani_access');
-            window.location.reload();
-        }
-        
-        // STEP NAVIGATION
-        function goStep2() {
+document.addEventListener('DOMContentLoaded', function() {
+
+  // ============ UTILITIES ============
+  
+  function typeText(elementId, text, speed, callback) {
+    const el = document.getElementById(elementId);
+    if (!el) { if (callback) callback(); return; }
+    el.textContent = '';
+    let i = 0;
+    function next() {
+      if (i < text.length) {
+        el.textContent += text[i];
+        playTick();
+        i++;
+        setTimeout(next, speed);
+      } else {
+        if (callback) callback();
+      }
+    }
+    next();
+  }
+
+  function fadeIn(elementId, delay, callback) {
+    delay = delay || 0;
+    setTimeout(function() {
+      const el = document.getElementById(elementId);
+      if (!el) { if (callback) callback(); return; }
+      el.style.opacity = '0';
+      el.style.visibility = 'visible';
+      el.style.transition = 'opacity 0.8s ease';
+      setTimeout(function() {
+        el.style.opacity = '1';
+        if (callback) setTimeout(callback, 800);
+      }, 50);
+    }, delay);
+  }
+
+  function hideElement(elementId) {
+    const el = document.getElementById(elementId);
+    if (el) { el.style.display = 'none'; el.style.opacity = '0'; }
+  }
+
+  function showElement(elementId, displayType) {
+    const el = document.getElementById(elementId);
+    if (el) {
+      el.style.display = displayType || 'flex';
+      el.style.opacity = '0';
+      el.style.transition = 'opacity 0.8s ease';
+      setTimeout(function() { el.style.opacity = '1'; }, 50);
+    }
+  }
+
+  // ============ SOUND ============
+  
+  let audioCtx = null;
+  let soundEnabled = false;
+
+  function initAudio() {
+    if (!audioCtx) {
+      try {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      } catch(e) {}
+    }
+  }
+
+  function playTick() {
+    if (!soundEnabled || !audioCtx) return;
+    try {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.frequency.value = 600;
+      gain.gain.setValueAtTime(0.025, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
+      osc.start(audioCtx.currentTime);
+      osc.stop(audioCtx.currentTime + 0.04);
+    } catch(e) {}
+  }
+
+  const soundToggle = document.getElementById('sound-toggle');
+  if (soundToggle) {
+    soundToggle.addEventListener('click', function() {
+      initAudio();
+      soundEnabled = !soundEnabled;
+      soundToggle.textContent = soundEnabled ? 'sound ●' : 'sound';
+      soundToggle.style.opacity = soundEnabled ? '0.7' : '0.3';
+    });
+  }
+
+  // ============ CURSOR ============
+  
+  if (window.matchMedia('(pointer: fine)').matches) {
+    const cursor = document.getElementById('cursor');
+    if (cursor) {
+      cursor.style.display = 'block';
+      document.addEventListener('mousemove', function(e) {
+        cursor.style.left = e.clientX + 'px';
+        cursor.style.top = e.clientY + 'px';
+      });
+      document.querySelectorAll('button, a, [onclick]').forEach(function(el) {
+        el.addEventListener('mouseenter', function() {
+          cursor.style.width = '22px';
+          cursor.style.height = '22px';
+        });
+        el.addEventListener('mouseleave', function() {
+          cursor.style.width = '12px';
+          cursor.style.height = '12px';
+        });
+      });
+    }
+  }
+
+  // ============ HESITATION TIMER ============
+  
+  let hesitationTimer = null;
+  let hesitationActive = false;
+
+  function startHesitationTimer() {
+    clearTimeout(hesitationTimer);
+    hesitationTimer = setTimeout(runHesitationSequence, 8000);
+  }
+
+  function cancelHesitationTimer() {
+    clearTimeout(hesitationTimer);
+    hesitationTimer = null;
+    if (hesitationActive) {
+      hesitationActive = false;
+      hideElement('hesitation-overlay');
+    }
+  }
+
+  function runHesitationSequence() {
+    hesitationActive = true;
+    const overlay = document.getElementById('hesitation-overlay');
+    if (!overlay) return;
+    
+    document.querySelectorAll('#step2 button, #step3 button').forEach(function(b) {
+      b.style.opacity = '0';
+      b.style.pointerEvents = 'none';
+    });
+
+    overlay.style.display = 'flex';
+    overlay.style.opacity = '0';
+    overlay.style.transition = 'opacity 0.8s ease';
+    setTimeout(function() { overlay.style.opacity = '1'; }, 50);
+
+    const textEl = document.getElementById('hesitation-text');
+    const lines = [
+      "You're still thinking.",
+      "That's already an answer.",
+      "The ones who belong here don't hesitate.",
+      "Access is closing."
+    ];
+    const delays = [0, 2500, 5000, 7500];
+
+    lines.forEach(function(line, i) {
+      setTimeout(function() {
+        if (!hesitationActive) return;
+        if (textEl) textEl.textContent = line;
+      }, delays[i]);
+    });
+
+    setTimeout(function() {
+      if (!hesitationActive) return;
+      let count = 5;
+      if (textEl) textEl.textContent = count;
+      if (textEl) textEl.style.fontSize = '4rem';
+      if (textEl) textEl.style.color = '#c9a84c';
+      
+      const countInterval = setInterval(function() {
+        if (!hesitationActive) { clearInterval(countInterval); return; }
+        count--;
+        if (count > 0) {
+          if (textEl) textEl.textContent = count;
+        } else {
+          clearInterval(countInterval);
+          if (textEl) textEl.textContent = 'Access closed.';
+          if (textEl) textEl.style.fontSize = '0.9rem';
+          if (textEl) textEl.style.color = 'white';
+          setTimeout(function() {
             if (hesitationActive) {
-                hesitationActive = false;
-                var el = document.getElementById('hesitation-text');
-                el.style.opacity = '0';
-                setTimeout(function() { el.style.display = 'none'; }, 600);
-                var activeStep = document.querySelector('.step.active');
-                if (activeStep) {
-                    activeStep.style.display = 'flex';
-                    activeStep.style.opacity = '1';
-                }
-                var timer = document.getElementById('return-timer');
-                if (timer) timer.style.display = 'block';
+              localStorage.setItem('imani_visited', 'true');
+              window.location.href = '/closed.html';
             }
-            clearHesTimer();
-            showStep('step2');
-            typeText(document.getElementById('step2-q'), "Why are you here?", 50, function() {
-                var btns = document.querySelectorAll('#step2 button');
-                fadeInButton(btns[0], 0);
-                fadeInButton(btns[1], 400);
-                fadeInButton(btns[2], 800);
-                setTimeout(startHesTimer, 1500);
-            });
+          }, 1500);
         }
-        
-        function selectStep2(opt) {
-            if (hesitationActive) {
-                hesitationActive = false;
-                var el = document.getElementById('hesitation-text');
-                el.style.opacity = '0';
-                setTimeout(function() { el.style.display = 'none'; }, 600);
-                var activeStep = document.querySelector('.step.active');
-                if (activeStep) {
-                    activeStep.style.display = 'flex';
-                    activeStep.style.opacity = '1';
-                }
-                var timer = document.getElementById('return-timer');
-                if (timer) timer.style.display = 'block';
+      }, 1000);
+    }, 10000);
+  }
+
+  // ============ RETURN COUNTDOWN ============
+  
+  let returnInterval = null;
+
+  function startReturnCountdown() {
+    const timerEl = document.getElementById('return-timer');
+    if (!timerEl) return;
+    timerEl.style.display = 'block';
+    let seconds = 30;
+    timerEl.textContent = '0:30';
+    
+    returnInterval = setInterval(function() {
+      seconds--;
+      const m = Math.floor(seconds / 60);
+      const s = seconds % 60;
+      timerEl.textContent = m + ':' + (s < 10 ? '0' : '') + s;
+      if (seconds <= 0) {
+        clearInterval(returnInterval);
+        window.location.href = '/closed.html';
+      }
+    }, 1000);
+  }
+
+  // ============ REJECTION SCREEN ============
+  
+  function showRejection(message) {
+    cancelHesitationTimer();
+    hideElement('step2');
+    hideElement('step3');
+    
+    const rejEl = document.getElementById('rejection');
+    const textEl = document.getElementById('rejection-text');
+    if (!rejEl) return;
+    
+    rejEl.style.display = 'flex';
+    rejEl.style.opacity = '0';
+    rejEl.style.transition = 'opacity 0.8s ease';
+    setTimeout(function() { rejEl.style.opacity = '1'; }, 50);
+    
+    if (textEl) {
+      textEl.textContent = '';
+      typeText('rejection-text', message, 40, function() {
+        setTimeout(function() {
+          const sub = document.getElementById('rejection-sub');
+          if (sub) {
+            sub.style.opacity = '0';
+            sub.style.visibility = 'visible';
+            sub.style.transition = 'opacity 0.8s ease';
+            setTimeout(function() { sub.style.opacity = '1'; }, 50);
+          }
+          setTimeout(function() {
+            const retry = document.getElementById('rejection-retry');
+            if (retry) {
+              retry.style.opacity = '0';
+              retry.style.visibility = 'visible';
+              retry.style.transition = 'opacity 0.8s ease';
+              setTimeout(function() { retry.style.opacity = '1'; }, 50);
             }
-            clearHesTimer();
-            if (opt === 1) {
-                showStep('step3');
-                typeText(document.getElementById('step3-q'), "What are you willing to offer?", 50, function() {
-                    var btns = document.querySelectorAll('#step3 button');
-                    fadeInButton(btns[0], 0);
-                    fadeInButton(btns[1], 400);
-                    fadeInButton(btns[2], 800);
-                    setTimeout(startHesTimer, 1500);
-                });
-            } else {
-                showStep('step2-fail');
-                typeText(document.getElementById('step2fail-q'), "Then you're not ready.", 50, function() {
-                    setTimeout(function() {
-                        fadeIn(document.getElementById('step2fail-extra'), 0);
-                    }, 1500);
-                });
+          }, 1500);
+        }, 1000);
+      });
+    }
+  }
+
+  // ============ FINAL SCREEN ============
+  
+  function showFinal() {
+    cancelHesitationTimer();
+    if (returnInterval) clearInterval(returnInterval);
+    
+    sessionStorage.setItem('imani_access', 'granted');
+    
+    hideElement('step3');
+    const finalEl = document.getElementById('final');
+    if (!finalEl) return;
+    
+    finalEl.style.display = 'flex';
+    finalEl.style.opacity = '0';
+    finalEl.style.transition = 'opacity 0.8s ease';
+    setTimeout(function() { finalEl.style.opacity = '1'; }, 50);
+    
+    typeText('final-text1', 'You have access.', 50, function() {
+      setTimeout(function() {
+        fadeIn('final-text2', 0, function() {
+          const links = ['final-link1', 'final-link2', 'final-link3'];
+          links.forEach(function(id, i) {
+            fadeIn(id, i * 600);
+          });
+        });
+      }, 1000);
+    });
+  }
+
+  // ============ STEP 2 ============
+  
+  function showStep2() {
+    hideElement('step1');
+    const step2 = document.getElementById('step2');
+    if (!step2) return;
+    step2.style.display = 'flex';
+    step2.style.opacity = '0';
+    step2.style.transition = 'opacity 0.8s ease';
+    setTimeout(function() { step2.style.opacity = '1'; }, 50);
+    
+    typeText('step2-question', 'Why are you here?', 50, function() {
+      setTimeout(function() {
+        fadeIn('step2-btn1', 0);
+        fadeIn('step2-btn2', 400);
+        fadeIn('step2-btn3', 800);
+        setTimeout(startHesitationTimer, 1200);
+      }, 500);
+    });
+  }
+
+  // ============ STEP 3 ============
+  
+  function showStep3() {
+    hideElement('step2');
+    const step3 = document.getElementById('step3');
+    if (!step3) return;
+    step3.style.display = 'flex';
+    step3.style.opacity = '0';
+    step3.style.transition = 'opacity 0.8s ease';
+    setTimeout(function() { step3.style.opacity = '1'; }, 50);
+    
+    typeText('step3-question', 'What are you willing to offer?', 50, function() {
+      setTimeout(function() {
+        fadeIn('step3-btn1', 0);
+        fadeIn('step3-btn2', 400);
+        fadeIn('step3-btn3', 800);
+        setTimeout(startHesitationTimer, 1200);
+      }, 500);
+    });
+  }
+
+  // ============ STEP 1 ============
+  
+  function startExperience() {
+    typeText('step1-text1', 'Access is not a right.', 50, function() {
+      setTimeout(function() {
+        typeText('step1-text2', "It's a response.", 50, function() {
+          setTimeout(function() {
+            const btn = document.getElementById('step1-btn');
+            if (btn) {
+              btn.style.visibility = 'visible';
+              btn.style.opacity = '0';
+              btn.style.transition = 'opacity 0.8s ease';
+              setTimeout(function() { btn.style.opacity = '1'; }, 50);
             }
-        }
-        
-        function selectStep3(opt) {
-            if (hesitationActive) {
-                hesitationActive = false;
-                var el = document.getElementById('hesitation-text');
-                el.style.opacity = '0';
-                setTimeout(function() { el.style.display = 'none'; }, 600);
-                var activeStep = document.querySelector('.step.active');
-                if (activeStep) {
-                    activeStep.style.display = 'flex';
-                    activeStep.style.opacity = '1';
-                }
-                var timer = document.getElementById('return-timer');
-                if (timer) timer.style.display = 'block';
-            }
-            clearHesTimer();
-            if (opt === 3) {
-                showStep('step-access');
-                sessionStorage.setItem('imani_access', 'granted');
-                stopReturnTimer();
-                fadeIn(document.getElementById('access-sub'), 0);
-                typeText(document.getElementById('access-h1'), "You have access.", 50, function() {
-                    setTimeout(function() {
-                        var links = document.querySelectorAll('#step-access .links a');
-                        fadeIn(links[0], 0);
-                        fadeIn(links[1], 300);
-                        fadeIn(links[2], 600);
-                    }, 1000);
-                });
-            } else {
-                showStep('step3-fail');
-                typeText(document.getElementById('step3fail-q'), "Not enough.", 50, function() {
-                    setTimeout(function() {
-                        fadeIn(document.getElementById('step3fail-extra'), 0);
-                    }, 1500);
-                });
-            }
-        }
-        
-        // INIT
-        function init() {
-            document.getElementById('bg').classList.add('loaded');
-            
-            if (sessionStorage.getItem('imani_access') === 'granted') {
-                showStep('step-access');
-                document.getElementById('access-h1').textContent = 'You have access.';
-                fadeIn(document.getElementById('access-sub'), 0);
-                var links = document.querySelectorAll('#step-access .links a');
-                fadeIn(links[0], 0);
-                fadeIn(links[1], 300);
-                fadeIn(links[2], 600);
-                return;
-            }
-            
-            if (localStorage.getItem('imani_visited')) {
-                startReturnTimer();
-            }
-            
-            typeText(document.getElementById('step1-h1'), "Access is not a right.", 50, function() {
-                setTimeout(function() {
-                    document.getElementById('step1-h1').innerHTML += '<br>';
-                    typeText(document.getElementById('step1-h1'), "It's a response.", 50, function() {
-                        setTimeout(function() {
-                            fadeIn(document.querySelector('#step1 button'), 0);
-                        }, 1200);
-                    });
-                }, 800);
-            });
-        }
-        
-        setTimeout(init, 500);
-    </script>
+          }, 1200);
+        });
+      }, 800);
+    });
+  }
+
+  // ============ BUTTON HANDLERS ============
+  
+  const step1Btn = document.getElementById('step1-btn');
+  if (step1Btn) {
+    step1Btn.addEventListener('click', function() {
+      initAudio();
+      showStep2();
+    });
+  }
+
+  const step2Btn1 = document.getElementById('step2-btn1');
+  if (step2Btn1) {
+    step2Btn1.addEventListener('click', function() {
+      cancelHesitationTimer();
+      step2Btn1.style.boxShadow = '0 0 20px rgba(201,168,76,0.6)';
+      step2Btn1.style.borderColor = '#c9a84c';
+      setTimeout(showStep3, 400);
+    });
+  }
+
+  const step2Btn2 = document.getElementById('step2-btn2');
+  if (step2Btn2) {
+    step2Btn2.addEventListener('click', function() {
+      cancelHesitationTimer();
+      showRejection("Then you're not ready.");
+    });
+  }
+
+  const step2Btn3 = document.getElementById('step2-btn3');
+  if (step2Btn3) {
+    step2Btn3.addEventListener('click', function() {
+      cancelHesitationTimer();
+      showRejection("Then you're not ready.");
+    });
+  }
+
+  const step3Btn1 = document.getElementById('step3-btn1');
+  if (step3Btn1) {
+    step3Btn1.addEventListener('click', function() {
+      cancelHesitationTimer();
+      showRejection('Not enough.');
+    });
+  }
+
+  const step3Btn2 = document.getElementById('step3-btn2');
+  if (step3Btn2) {
+    step3Btn2.addEventListener('click', function() {
+      cancelHesitationTimer();
+      showRejection('Not enough.');
+    });
+  }
+
+  const step3Btn3 = document.getElementById('step3-btn3');
+  if (step3Btn3) {
+    step3Btn3.addEventListener('click', function() {
+      cancelHesitationTimer();
+      step3Btn3.style.boxShadow = '0 0 20px rgba(201,168,76,0.6)';
+      step3Btn3.style.borderColor = '#c9a84c';
+      setTimeout(showFinal, 400);
+    });
+  }
+
+  const retryBtn = document.getElementById('rejection-retry');
+  if (retryBtn) {
+    retryBtn.addEventListener('click', function() {
+      sessionStorage.removeItem('imani_access');
+      window.location.reload();
+    });
+  }
+
+  const fanvueLink = document.getElementById('final-link3');
+  if (fanvueLink) {
+    fanvueLink.addEventListener('click', function() {
+      window.va && window.va('event', { name: 'fanvue_clicked' });
+    });
+  }
+
+  // ============ INIT ============
+  
+  document.getElementById('bg').classList.add('loaded');
+  
+  if (sessionStorage.getItem('imani_access') === 'granted') {
+    hideElement('step1');
+    showFinal();
+    return;
+  }
+
+  const isReturning = localStorage.getItem('imani_visited') === 'true';
+  
+  setTimeout(function() {
+    startExperience();
+    if (isReturning) {
+      startReturnCountdown();
+    }
+  }, 1500);
+
+  history.pushState(null, null, window.location.href);
+  window.addEventListener('popstate', function() {
+    history.pushState(null, null, window.location.href);
+  });
+
+  let exitTriggered = false;
+  document.addEventListener('mouseleave', function(e) {
+    if (e.clientY < 0 && !exitTriggered) {
+      exitTriggered = true;
+      const exitEl = document.getElementById('exit-overlay');
+      if (exitEl) {
+        exitEl.style.display = 'flex';
+        setTimeout(function() { exitEl.style.display = 'none'; }, 4000);
+      }
+    }
+  });
+
+});
+</script>
 </body>
 </html>
