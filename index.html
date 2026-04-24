@@ -119,6 +119,14 @@
             text-decoration-color: #c9a84c;
         }
         
+        .options {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.8rem;
+            margin-top: 2rem;
+        }
+        
         /* BUTTONS */
         button {
             background: transparent;
@@ -137,6 +145,7 @@
             position: relative;
             z-index: 20;
             opacity: 0;
+            visibility: hidden;
             transition: opacity 0.8s ease;
         }
         
@@ -248,9 +257,11 @@
     <!-- STEP 2 -->
     <div class="step" id="step2">
         <p class="question" id="step2-q"></p>
-        <button onclick="selectStep2(1)" style="display:none">I recognize value when I see it.</button>
-        <button onclick="selectStep2(2)" style="display:none">I need to understand first.</button>
-        <button onclick="selectStep2(3)" style="display:none">I'm just curious.</button>
+        <div class="options">
+            <button onclick="selectStep2(1)" style="opacity:0;visibility:hidden">I recognize value when I see it.</button>
+            <button onclick="selectStep2(2)" style="opacity:0;visibility:hidden">I need to understand first.</button>
+            <button onclick="selectStep2(3)" style="opacity:0;visibility:hidden">I'm just curious.</button>
+        </div>
     </div>
     
     <!-- STEP 2 FAIL -->
@@ -263,9 +274,11 @@
     <!-- STEP 3 -->
     <div class="step" id="step3">
         <p class="question" id="step3-q"></p>
-        <button onclick="selectStep3(1)" style="display:none">My attention.</button>
-        <button onclick="selectStep3(2)" style="display:none">My time.</button>
-        <button onclick="selectStep3(3)" style="display:none">My resources.</button>
+        <div class="options">
+            <button onclick="selectStep3(1)" style="opacity:0;visibility:hidden">My attention.</button>
+            <button onclick="selectStep3(2)" style="opacity:0;visibility:hidden">My time.</button>
+            <button onclick="selectStep3(3)" style="opacity:0;visibility:hidden">My resources.</button>
+        </div>
     </div>
     
     <!-- STEP 3 FAIL -->
@@ -490,6 +503,14 @@
             }, delay);
         }
         
+        function fadeInButton(element, delay) {
+            setTimeout(function() {
+                element.style.transition = 'opacity 0.8s ease';
+                element.style.visibility = 'visible';
+                element.style.opacity = '1';
+            }, delay);
+        }
+        
         // SHOW STEP
         function showStep(stepId) {
             document.querySelectorAll('.step').forEach(function(s) { 
@@ -527,9 +548,9 @@
             showStep('step2');
             typeText(document.getElementById('step2-q'), "Why are you here?", 50, function() {
                 var btns = document.querySelectorAll('#step2 button');
-                fadeIn(btns[0], 0);
-                fadeIn(btns[1], 300);
-                fadeIn(btns[2], 600);
+                fadeInButton(btns[0], 0);
+                fadeInButton(btns[1], 400);
+                fadeInButton(btns[2], 800);
                 setTimeout(startHesTimer, 1500);
             });
         }
@@ -553,9 +574,9 @@
                 showStep('step3');
                 typeText(document.getElementById('step3-q'), "What are you willing to offer?", 50, function() {
                     var btns = document.querySelectorAll('#step3 button');
-                    fadeIn(btns[0], 0);
-                    fadeIn(btns[1], 300);
-                    fadeIn(btns[2], 600);
+                    fadeInButton(btns[0], 0);
+                    fadeInButton(btns[1], 400);
+                    fadeInButton(btns[2], 800);
                     setTimeout(startHesTimer, 1500);
                 });
             } else {
