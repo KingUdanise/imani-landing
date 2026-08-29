@@ -16,8 +16,8 @@
     <script defer src="/_vercel/insights/script.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body { height: 100%; width: 100%; overflow: hidden; margin: 0; padding: 0; }
-        body {
+        html, body { border: 2px solid #c9a84c; box-sizing: border-box;  height: 100%; width: 100%; overflow: hidden; margin: 0; padding: 0; }
+        body { border: 2px solid #c9a84c; box-sizing: border-box; 
             background-color: #0a0a0a;
             color: white;
             font-family: 'Cormorant Garamond', Georgia, serif;
@@ -47,7 +47,7 @@
             position: fixed;
             top: 0; left: 0;
             width: 100%; height: 100%;
-            background: rgba(0,0,0,0.78);
+            background: radial-gradient(circle, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.95) 100%);
             z-index: 1;
             pointer-events: none;
         }
@@ -268,7 +268,7 @@
     <div id="step2">
         <p id="step2-question"></p>
         <div id="step2-options" class="options">
-            <button id="step2-btn1" class="step-btn">I recognize value when I see it.</button>
+            <button id="step2-btn1" class="step-btn">I recognize a superior authority when I see one.</button>
             <button id="step2-btn2" class="step-btn">I need to understand first.</button>
             <button id="step2-btn3" class="step-btn">I'm just curious.</button>
         </div>
@@ -280,7 +280,7 @@
         <div class="options">
             <button id="step3-btn1" class="step-btn">My attention.</button>
             <button id="step3-btn2" class="step-btn">My time.</button>
-            <button id="step3-btn3" class="step-btn">My resources.</button>
+            <button id="step3-btn3" class="step-btn">My absolute financial devotion.</button>
         </div>
     </div>
     
@@ -583,7 +583,7 @@ document.addEventListener('DOMContentLoaded', function() {
     finalEl.style.transition = 'opacity 0.8s ease';
     setTimeout(function() { finalEl.style.opacity = '1'; }, 50);
     
-    typeText('final-text1', 'You have access.', 50, function() {
+    typeText('final-text1', 'Your submission is noted. You may enter.', 50, function() {
       setTimeout(function() {
         fadeIn('final-text2', 0, function() {
           const links = ['final-link1', 'final-link2', 'final-link3'];
@@ -606,7 +606,7 @@ document.addEventListener('DOMContentLoaded', function() {
     step2.style.transition = 'opacity 0.8s ease';
     setTimeout(function() { step2.style.opacity = '1'; }, 50);
     
-    typeText('step2-question', 'Why are you here?', 50, function() {
+    typeText('step2-question', 'State your purpose for seeking my attention.', 50, function() {
       setTimeout(function() {
         fadeIn('step2-btn1', 0);
         fadeIn('step2-btn2', 400);
@@ -627,7 +627,7 @@ document.addEventListener('DOMContentLoaded', function() {
     step3.style.transition = 'opacity 0.8s ease';
     setTimeout(function() { step3.style.opacity = '1'; }, 50);
     
-    typeText('step3-question', 'What are you willing to offer?', 50, function() {
+    typeText('step3-question', 'What tribute do you deem worthy of my time?', 50, function() {
       setTimeout(function() {
         fadeIn('step3-btn1', 0);
         fadeIn('step3-btn2', 400);
